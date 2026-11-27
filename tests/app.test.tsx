@@ -387,3 +387,16 @@ test('a tab whose clicked read was overtaken is read automatically again', async
   await visit(fake, LISTING_7, '7');
   expect(field('id').value).toBe('7');
 });
+
+test('browsing leaves the saved list open unless a different listing appears', async () => {
+  const fake = fakeChrome([]);
+  fake.access.granted = true;
+  await start(fake);
+  await visit(fake, LISTING_7, '7');
+  await click('[data-tab="saved"]');
+  const savedIsOpen = () => find('[data-tab="saved"]').getAttribute('aria-current') === 'page';
+  await visit(fake, LISTING_7, '7'); // the same listing, for example after switching tabs
+  expect(savedIsOpen()).toBe(true);
+  await visit(fake, LISTING_7.replace('07/', '08/'), '8');
+  expect(savedIsOpen()).toBe(false);
+});

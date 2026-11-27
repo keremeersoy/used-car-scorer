@@ -58,6 +58,9 @@ export function App() {
   const { listings, error, load, save, remove, restore } = useListings();
   const begin = useRef(createSequence()).current;
 
+  const shownId = useRef<string | undefined>(undefined);
+  shownId.current = state.draft?.listing.id;
+
   // The clicked read that is still running, if any.
   const clickedRead = useRef<{ tabId: number } | null>(null);
 
@@ -74,7 +77,10 @@ export function App() {
         const saved = (await load()) ?? [];
         if (!isCurrent()) return;
         setState((current) => how(current, result, saved));
-        setTab('listing');
+        // Browsing opens the listing tab only for a listing that is not already shown.
+        const another =
+          result.kind === 'page' && result.recognised && result.read.id !== shownId.current;
+        if (click || another) setTab('listing');
       } finally {
         // Cleared even when overtaken, or this tab would never be read automatically again.
         if (click && clickedRead.current === click) clickedRead.current = null;
