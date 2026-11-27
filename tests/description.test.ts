@@ -23,6 +23,25 @@ test.each<[string, number]>([
   ['Tavan egirbek tamir edildi', 7],
   ['Airbek patladı', 7],
   ['Acil satılık, sorunsuz araç', 7],
+  // A negator that belongs to something else must not clear the warning.
+  ['Pert kayıtlı motor sorunsuz', 7],
+  ['Pert kayıtlıdır motoru hatasız', 7],
+  ['Acil satılık sorunsuz araç', 7],
+  ['ACİL SATILIK SORUNSUZ', 7],
+  ['Acil sorunsuz', 7],
+  ['Ağır hasar kayıtlı boya yok', 7],
+  ['Ağır hasar kayıtlı sorunsuz', 7],
+  ['Ağır hasar değişen yok', 7],
+  ['Pert araç sorun yok', 7],
+  ['Airbag açtı değişen yok', 7],
+  ['Airbag orijinal değil', 7],
+  // Real negations still clear it.
+  ['Ağır hasar kaydı kesinlikle yoktur', 10],
+  ['Pert kaydı bulunmamaktadır', 10],
+  ['Ağır hasarlı değildir', 10],
+  ['Airbag sorunu yok', 10],
+  ['Şasi işlem yoktur', 10],
+  ['Airbagler orijinal ve hatasız', 10],
 ])('%s → %i', (text, points) => expect(run(text).points).toBe(points));
 
 test('every match shows its sentence, negated ones uncounted', () => {

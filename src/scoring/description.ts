@@ -16,9 +16,33 @@ function phrasePattern(phrase: string): RegExp {
   return new RegExp(`(?<![\\p{L}\\p{N}])${words}`, 'u');
 }
 
-function negatorPattern(negators: string[]): RegExp {
-  const words = negators.map((word) => escape(fold(word))).join('|');
-  return new RegExp(`(?<!\\p{L})(?:${words})(?!\\p{L})`, 'gu');
+/** Words that negate, and the words allowed to stand between the phrase and them. */
+interface Rule {
+  negators: Set<string>;
+  fillers: Set<string>;
+}
+
+const rule = (negators: string[], fillers: string[]): Rule => ({
+  negators: new Set(negators.map(fold)),
+  fillers: new Set(fillers.map(fold)),
+});
+
+function rulesFor(phrase: string, cfg: Config['description']): Rule[] {
+  const { negators, fillers, partNegation: part } = cfg;
+  if (!part.phrases.includes(phrase)) return [rule(negators, fillers)];
+  return [
+    rule(negators, [...fillers, ...part.fillers]),
+    rule(part.flawless, part.flawlessFillers),
+  ];
+}
+
+function isNegated(after: string[], { negators, fillers }: Rule): boolean {
+  for (const word of after) {
+    if (negators.has(word)) return true;
+    // Any other word means the negator is probably about something else.
+    if (!fillers.has(word)) return false;
+  }
+  return false;
 }
 
 export function scoreDescription(text: string | null, cfg: Config): SectionResult {
@@ -27,23 +51,30 @@ export function scoreDescription(text: string | null, cfg: Config): SectionResul
     return { points: null, max, reasons: [], warnings: ['descriptionMissing'] };
   }
 
-  const { penalty, phrases, negators } = cfg.description;
+  const { penalty, phrases } = cfg.description;
   const patterns = phrases
     .filter((phrase) => phrase.trim() !== '')
-    .map((phrase) => ({ phrase, pattern: phrasePattern(phrase) }));
-  const negator = negatorPattern(negators);
+    .map((phrase) => ({
+      phrase,
+      pattern: phrasePattern(phrase),
+      rules: rulesFor(phrase, cfg.description),
+    }));
   const charged = new Set<string>();
   const reasons: Reason[] = [];
 
   for (const sentence of text.split(SENTENCE)) {
     for (const clause of sentence.split(CLAUSE)) {
       const folded = fold(clause);
-      for (const { phrase, pattern } of patterns) {
+      for (const { phrase, pattern, rules } of patterns) {
         const match = pattern.exec(folded);
         if (!match) continue;
-        // A negator counts only when it follows the phrase within the same clause.
-        negator.lastIndex = match.index + match[0].length;
-        const negated = negator.test(folded);
+        // Only what follows the matched word, within the same clause, can negate it.
+        const after = folded
+          .slice(match.index + match[0].length)
+          .replace(/^\p{L}+/u, '') // the rest of the word, such as a suffix
+          .split(/[^\p{L}]+/u)
+          .filter(Boolean);
+        const negated = rules.some((candidate) => isNegated(after, candidate));
         const charge = !negated && !charged.has(phrase);
         if (charge) charged.add(phrase);
         reasons.push({

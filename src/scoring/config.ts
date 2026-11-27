@@ -38,7 +38,16 @@ export interface Config {
   description: {
     penalty: number;
     phrases: string[];
+    /** A negator clears a phrase only if every word between them is a filler. */
     negators: string[];
+    fillers: string[];
+    /** Extra negations that are only safe after a phrase naming a car part. */
+    partNegation: {
+      phrases: string[];
+      fillers: string[]; // extra words allowed before an ordinary negator
+      flawless: string[]; // words saying the part is fine
+      flawlessFillers: string[];
+    };
   };
 }
 
@@ -95,9 +104,16 @@ export const config: Config = {
     penalty: 3,
     // 'egirbek' and 'airbek' are how some sellers spell airbag.
     phrases: ['ağır hasar', 'pert', 'airbag', 'egirbek', 'airbek', 'şasi', 'motor arızalı', 'acil'],
-    negators: [
-      'yok', 'yoktur', 'değil', 'değildir', 'bulunmamaktadır', 'bulunmuyor',
-      'hatasız', 'hatasızdır', 'sorunsuz', 'sorunsuzdur',
+    negators: ['yok', 'yoktur', 'değil', 'değildir', 'bulunmamaktadır', 'bulunmuyor'],
+    fillers: [
+      'kayıt', 'kaydı', 'kayıtlı', 'durumu', 'hasarı', 'hiç', 'herhangi', 'bir',
+      'kesinlikle', 'dahi', 'bile',
     ],
+    partNegation: {
+      phrases: ['airbag', 'egirbek', 'airbek', 'şasi'],
+      fillers: ['sorun', 'sorunu', 'problem', 'problemi', 'işlem', 'işlemi', 'değişimi'],
+      flawless: ['hatasız', 'hatasızdır', 'sorunsuz', 'sorunsuzdur'],
+      flawlessFillers: ['orijinal', 'orjinal', 've'],
+    },
   },
 };
