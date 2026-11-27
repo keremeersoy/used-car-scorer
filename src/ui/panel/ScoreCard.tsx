@@ -4,7 +4,7 @@ import {
 } from '../strings';
 
 const ORDER: SectionKey[] = ['damage', 'price', 'km', 'description'];
-const missingLabels = { price: 'Fiyat', km: fieldLabels.km, year: fieldLabels.year };
+const missingLabels = { price: sectionLabels.price, km: fieldLabels.km, year: fieldLabels.year };
 
 export function ScoreCard({
   result,

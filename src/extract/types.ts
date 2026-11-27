@@ -1,6 +1,6 @@
 import type { PageRead } from '../types';
 
-export type ExtractNotice = 'foreignCurrency';
+export type ExtractNotice = 'foreignCurrency' | 'priceUnreadable';
 
 export interface ExtractResult {
   read: PageRead;

@@ -9,6 +9,7 @@ import { config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
 import { noticeText, strings } from '../strings';
 import { useListings } from '../useListings';
+import { Backup } from './Backup';
 import { ListingForm } from './ListingForm';
 import {
   afterSave, discardAndReplace, initialState, keepCurrent, receive, savedWhileEditing,
@@ -38,7 +39,7 @@ export function App() {
   const [formValid, setFormValid] = useState(true);
   const [confirmingOverwrite, setConfirmingOverwrite] = useState(false);
   const [savedRevision, setSavedRevision] = useState<number | null>(null);
-  const { listings, error, load, save, remove } = useListings();
+  const { listings, error, load, save, remove, restore } = useListings();
   const begin = useRef(createSequence()).current;
 
   const read = useCallback(
@@ -218,6 +219,7 @@ export function App() {
           }}
           onRemove={(id) => void remove(id).catch(() => undefined)}
         />
+        <Backup listings={listings} onRestore={restore} />
       </div>
     </main>
   );

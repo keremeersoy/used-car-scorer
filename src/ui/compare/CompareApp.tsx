@@ -5,14 +5,19 @@ import { buildComparison } from './rows';
 import { parseIds } from './url';
 
 export function CompareApp() {
-  const { listings, error } = useListings();
-  const { columns, rows } = buildComparison(parseIds(location.search), listings, new Date());
+  const { listings, loaded, error } = useListings();
+  const { columns, rows, missing } = buildComparison(parseIds(location.search), listings, new Date());
   const best = (index: number) => (columns[index]?.isBest ? 'best' : undefined);
 
   return (
     <main>
       <h1>{strings.compare}</h1>
       {error && <p className="banner error" role="alert">{error}</p>}
+      {loaded && missing.length > 0 && (
+        <p className="banner" role="status">
+          {strings.notFound} {missing.map((id) => `#${id}`).join(', ')}
+        </p>
+      )}
       {columns.length === 0 ? (
         <p className="empty">{strings.compareNothing}</p>
       ) : (

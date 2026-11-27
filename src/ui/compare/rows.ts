@@ -58,8 +58,9 @@ export function buildComparison(
   saved: Listing[],
   now: Date,
   cfg: Config = config,
-): { columns: Column[]; rows: Row[] } {
+): { columns: Column[]; rows: Row[]; missing: string[] } {
   const listings = ids.flatMap((id) => saved.find((listing) => listing.id === id) ?? []);
+  const missing = ids.filter((id) => !listings.some((listing) => listing.id === id));
   // Every saved listing feeds the median, not only the compared ones.
   const results = listings.map((listing) => scoreListing(listing, saved, now, cfg));
   const totals = results.flatMap((result) => result.total ?? []);
@@ -112,5 +113,5 @@ export function buildComparison(
     ),
   ];
 
-  return { columns, rows };
+  return { columns, rows, missing };
 }

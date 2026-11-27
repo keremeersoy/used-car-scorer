@@ -46,6 +46,11 @@ export const strings = {
   noDeductions: 'Kesinti yok: boyalı ya da değişen parça ve hasar kaydı yok.',
   noPhrases: 'Uyarı ifadesi bulunmadı.',
   none: 'Yok',
+  notFound: 'Kayıtlarda bulunamayan ilanlar:',
+  exportBackup: 'Yedek al',
+  restoreBackup: 'Yedekten yükle',
+  backupUnreadable: 'Yedek dosyası okunamadı. Hiçbir kayıt değişmedi.',
+  backupTooLarge: 'Dosya çok büyük. Hiçbir kayıt değişmedi.',
   noRecord: 'Kayıt yok',
   incomplete: 'bilgi eksik',
 } as const;
@@ -107,10 +112,14 @@ export const noticeText: Record<Notice, string> = {
   notSahibinden: 'Bu sayfa sahibinden.com değil',
   noAccess: 'Eklenti simgesine tıklayın',
   foreignCurrency: 'Fiyat TL değil. TL karşılığını elle yazın.',
+  priceUnreadable: 'Fiyat okunamadı. Fiyatı elle yazın.',
 };
 
 export const formatNumber = (value: number, digits = 1) =>
   value.toLocaleString('tr-TR', { maximumFractionDigits: digits });
+
+export const restoreSummary = (added: number, updated: number, skipped: number) =>
+  `Yedek yüklendi: ${added} eklendi, ${updated} güncellendi, ${skipped} atlandı.`;
 
 export const formatMoney = (value: number) => `${formatNumber(value, 0)} TL`;
 

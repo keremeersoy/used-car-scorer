@@ -4,7 +4,7 @@ import { config } from '../scoring/config';
 import type { PartStatus } from '../types';
 import { parseWholeNumber, parseYear, type ParsedNumber } from '../ui/parse';
 import { description } from './description';
-import { unrecognised, type ExtractResult } from './types';
+import { unrecognised, type ExtractNotice, type ExtractResult } from './types';
 
 /** Our part key for each class name in the page's paint diagram. */
 // Maps, because class names come from the page and must not reach object internals.
@@ -47,7 +47,7 @@ function details(doc: Document): Map<string, string> {
   return found;
 }
 
-function price(doc: Document): { value: number | null; foreign: boolean } {
+function price(doc: Document): { value: number | null; notice: ExtractNotice | null } {
   // The heading also holds the price history widget, so only its own text is the price.
   const heading = doc.querySelector('.classifiedPriceValue');
   const own = clean(
@@ -57,11 +57,12 @@ function price(doc: Document): { value: number | null; foreign: boolean } {
       .join(' '),
   );
   const text = own ?? clean(doc.querySelector('#favoriteClassifiedPrice')?.getAttribute('value'));
-  if (!text) return { value: null, foreign: false };
-  if (/USD|EUR|GBP|[$€£]/.test(text)) return { value: null, foreign: true };
-  if (!/TL$/.test(text)) return { value: null, foreign: false };
-  const value = number(parseWholeNumber(text));
-  return { value: value === 0 ? null : value, foreign: false };
+  if (text && /USD|EUR|GBP|[$€£]/.test(text)) return { value: null, notice: 'foreignCurrency' };
+  const value = text && /TL$/.test(text) ? number(parseWholeNumber(text)) : null;
+  // A price of 0 is a placeholder and counts as blank.
+  return value === null || value === 0
+    ? { value: null, notice: 'priceUnreadable' }
+    : { value, notice: null };
 }
 
 const allUnknown = (): Record<string, PartStatus> =>
@@ -95,7 +96,7 @@ export function extract(doc: Document, url: string): ExtractResult {
 
   return {
     recognised: true,
-    notices: cost.foreign ? ['foreignCurrency'] : [],
+    notices: cost.notice ? [cost.notice] : [],
     read: {
       id,
       url,

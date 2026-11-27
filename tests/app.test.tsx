@@ -2,6 +2,7 @@
 // The panel against a fake chrome API: reading, saving and their races.
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { toBackup } from '../src/storage/backup';
 import { STORE_KEY } from '../src/storage/listings';
 import type { Listing } from '../src/types';
 import { App } from '../src/ui/panel/App';
@@ -151,4 +152,24 @@ test('saved data that cannot be read during a page read is reported and not writ
   expect(text()).toContain('disk');
   await click('[data-action="save"]');
   expect(fake.stored()['7']!.damageRecordTL).toBe(9_000);
+});
+
+test('a backup file is restored from the saved tab, and a wrong file is explained', async () => {
+  const fake = fakeChrome([]);
+  await start(fake);
+  await click('[data-tab="saved"]');
+  const choose = async (content: string) => {
+    const input = find<HTMLInputElement>('[data-action="restore"]');
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: [{ size: content.length, text: async () => content }],
+    });
+    await act(async () => void input.dispatchEvent(new Event('change', { bubbles: true })));
+    await settle();
+  };
+  await choose('junk');
+  expect(text()).toContain('Yedek dosyası okunamadı');
+  await choose(toBackup([listing({ id: '9', title: 'Yedekten gelen' })], new Date()));
+  expect(fake.stored()['9']!.title).toBe('Yedekten gelen');
+  expect(text()).toContain('1 eklendi');
 });

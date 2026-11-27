@@ -1,11 +1,11 @@
 import { draftFromPage, draftFromSaved, emptyDraft, type Draft } from '../../draft/draft';
-import type { ExtractResult } from '../../extract/types';
+import type { ExtractNotice, ExtractResult } from '../../extract/types';
 import type { Listing } from '../../types';
 
 type PageResult = { kind: 'page' } & ExtractResult;
 export type ReadResult = PageResult | { kind: 'notSahibinden' } | { kind: 'noAccess' };
 export type Incoming = PageResult | { kind: 'saved'; listing: Listing };
-export type Notice = 'unreadable' | 'notSahibinden' | 'noAccess' | 'foreignCurrency';
+export type Notice = 'unreadable' | 'notSahibinden' | 'noAccess' | ExtractNotice;
 
 export interface PanelState {
   draft: Draft | null;

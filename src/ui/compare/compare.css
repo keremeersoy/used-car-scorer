@@ -2,7 +2,8 @@
 
 main { padding: 20px; }
 h1 { font-size: 18px; margin: 0 0 14px; }
-.banner.error { background: var(--warn-bg); color: var(--danger); border-radius: 8px; padding: 8px 12px; }
+.banner { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 8px 12px; }
+.banner.error { color: var(--danger); }
 .empty, .note { color: var(--muted); }
 .scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 table { border-collapse: separate; border-spacing: 0; width: 100%; }

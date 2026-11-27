@@ -27,6 +27,12 @@ const isListing = (value: unknown): value is Listing =>
   isObject(value.parts) &&
   Array.isArray(value.editedFields);
 
+export interface RestoreResult {
+  added: number;
+  updated: number;
+  skipped: number; // the saved entry was as new or newer
+}
+
 /** Runs a task while no other holder of the lock runs. */
 export type Lock = <T>(task: () => Promise<T>) => Promise<T>;
 
@@ -75,6 +81,24 @@ export function createListingStore(area: StorageArea, lock: Lock = (task) => tas
       await change((listings) => {
         listings[id] = { ...listing, id };
       });
+    },
+    /** Adds entries from a backup. A saved entry is replaced only by a newer one. */
+    async restore(entries: Listing[]): Promise<RestoreResult> {
+      const result: RestoreResult = { added: 0, updated: 0, skipped: 0 };
+      await change((listings) => {
+        for (const entry of entries) {
+          const id = entry.id.trim();
+          const existing = Object.hasOwn(listings, id) ? listings[id] : undefined;
+          if (existing && !(Date.parse(entry.savedAt) > Date.parse(existing.savedAt))) {
+            result.skipped++;
+            continue;
+          }
+          if (existing) result.updated++;
+          else result.added++;
+          listings[id] = { ...entry, id };
+        }
+      });
+      return result;
     },
     async remove(id: string): Promise<void> {
       await change((listings) => {

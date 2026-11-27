@@ -97,6 +97,7 @@ A full tab (`compare.html`, listing ids in the URL), one column per listing, scr
 - **Reading a saved listing again (call):** fields the owner typed or corrected keep the typed value, and the panel shows the page's value beside it when they differ, with a way to take the page's value. Fields never edited take the new page value, except that a value the page no longer states keeps the saved one. `referencePrice` is always kept. This needs `editedFields` in the record, tracked per part for `parts`.
 - Scores are never stored. They are calculated when shown, so a saved listing's score can change as the median, the current year or the config changes **(call)**.
 - Storage errors are shown, never swallowed.
+- **Backup (added later):** the saved list can be exported to a JSON file and restored from one. A restore checks every field and replaces a saved entry only with a newer one.
 
 ## 6. Data model
 

@@ -18,7 +18,7 @@ nedenlerini gösterir. İlanları kaydedip yan yana karşılaştırabilirsin.
 - Açık ilanı tek tıkla okur; her alan elle düzeltilebilir.
 - Puan anında güncellenir, her bölümün nedeni görünür.
 - Eksik bilgi hiçbir zaman "temiz" sayılmaz.
-- Kayıtlı ilanları karşılaştırır ve siler.
+- Kayıtlı ilanları karşılaştırır, siler, dosyaya yedekler ve geri yükler.
 - Tüm veriler tarayıcıda kalır; sunucu ve analitik yoktur.
 
 ## Neyi yapmaz
@@ -41,7 +41,8 @@ Chrome'da `chrome://extensions` sayfasını aç, **Geliştirici modu**'nu etkinl
 öğe yükle** ile `dist/` klasörünü seç. Yeni derlemeden sonra eklentiyi yenile.
 
 Kayıtlı ilanlar, eklentinin yüklendiği klasöre bağlıdır. Klasörü taşırsan veya eklentiyi kaldırırsan
-kayıtlar kaybolur.
+kayıtlar kaybolur; önce **Kayıtlılar** sekmesinden **Yedek al** ile dosyaya kaydet, sonra **Yedekten
+yükle** ile geri al.
 
 ## Kullanım
 

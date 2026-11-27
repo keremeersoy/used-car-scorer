@@ -56,3 +56,10 @@ textarea { resize: vertical; }
 /* Without this the buttons inherit the muted text colour and look disabled. */
 .saved-meta button { color: var(--text); }
 .saved-meta button.danger { color: var(--danger); }
+
+.backup { margin: 16px 0; }
+.backup .banner { margin-top: 8px; }
+/* The file input stays focusable but invisible; its label looks like a button. */
+.file-button { position: relative; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; }
+.file-button input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.file-button:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }

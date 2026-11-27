@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createListingStore, STORE_KEY, StorageDataError } from '../storage/listings';
+import {
+  createListingStore, STORE_KEY, StorageDataError, type RestoreResult,
+} from '../storage/listings';
 import type { Listing } from '../types';
 import { strings } from './strings';
 
@@ -19,6 +21,7 @@ const describe = (error: unknown, failed: string) =>
 export function useListings() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   /** The latest saved listings, or null (and a shown error) when they cannot be read. */
   const load = useCallback(async (): Promise<Listing[] | null> => {
@@ -34,6 +37,7 @@ export function useListings() {
     const saved = await load();
     if (!saved) return;
     setListings(saved);
+    setLoaded(true);
     setError(null);
   }, [load]);
 
@@ -62,5 +66,16 @@ export function useListings() {
   const save = useCallback((listing: Listing) => write(() => store.save(listing)), [write]);
   const remove = useCallback((id: string) => write(() => store.remove(id)), [write]);
 
-  return { listings, error, load, save, remove };
+  const restore = useCallback(
+    async (entries: Listing[]) => {
+      let result: RestoreResult = { added: 0, updated: 0, skipped: 0 };
+      await write(async () => {
+        result = await store.restore(entries);
+      });
+      return result;
+    },
+    [write],
+  );
+
+  return { listings, loaded, error, load, save, remove, restore };
 }

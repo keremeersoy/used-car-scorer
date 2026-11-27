@@ -109,3 +109,21 @@ test.each(['constructor original-new', 'roof constructor', '__proto__ toString']
     expect(Object.keys(read.parts)).toEqual(config.damage.parts.map((part) => part.key));
     expect(new Set(Object.values(read.parts))).toEqual(new Set(['unknown']));
   });
+
+const priced = (price: string) =>
+  extract(parse(`<div class="classifiedInfo">${price}
+    <dl><dt>KM</dt><dd>1.000</dd><dd id="classifiedId">5</dd></dl></div>`), 'u');
+
+test.each([
+  '<h3 class="classifiedPriceValue">1.250.000 ₺</h3>',
+  '<h3 class="classifiedPriceValue"><span>1.250.000 TL</span></h3>',
+  '',
+])('a price that cannot be read says so: %j', (markup) => {
+  const result = priced(markup);
+  expect(result.read.price).toBeNull();
+  expect(result.notices).toEqual(['priceUnreadable']);
+});
+
+test('a readable price raises no notice', () => {
+  expect(priced('<h3 class="classifiedPriceValue">1.250.000 TL</h3>').notices).toEqual([]);
+});

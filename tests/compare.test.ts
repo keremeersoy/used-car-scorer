@@ -13,7 +13,8 @@ const saved = [
 ];
 
 test('columns follow the ids, skip deleted ones, mark the best and the left-out sections', () => {
-  const { columns, rows } = buildComparison(['b', 'gone', 'a', 'c'], saved, NOW, testCfg);
+  const { columns, rows, missing } = buildComparison(['b', 'gone', 'a', 'c'], saved, NOW, testCfg);
+  expect(missing).toEqual(['gone']);
   expect(columns.map((c) => [c.id, c.isBest]))
     .toEqual([['b', false], ['a', true], ['c', false]]);
   expect(columns[0]!.excluded).toEqual(['price']);
