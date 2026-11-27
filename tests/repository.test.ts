@@ -13,10 +13,10 @@ const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: '
 test.each([
   ['a mobile number', ['0532', '123', '45', '67'].join(' ')],
   ['a mobile number with a country code', ['+90', '5321234567'].join('')],
-  ['a personal email', 'someone' + '@' + 'gmail.com'],
+  ['a personal email', ['someone', 'gmail.com'].join('@')],
   ['a home folder path', ['/Users', 'someone', 'project'].join('/')],
   ['a private key', ['-----BEGIN', 'PRIVATE KEY-----'].join(' ')],
-  ['a GitHub token', 'ghp_' + 'a'.repeat(36)],
+  ['a GitHub token', ['ghp', 'a'.repeat(36)].join('_')],
 ])('detects %s', (_, sample) => {
   expect(findLeaks(`text ${sample} text`)).toHaveLength(1);
 });
