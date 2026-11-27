@@ -136,3 +136,34 @@ test.each([
 test('a readable price raises no notice', () => {
   expect(priced('<h3 class="classifiedPriceValue">1.250.000 TL</h3>').notices).toEqual([]);
 });
+
+// An invented listing that copies only the element structure the reader looks for. Unlike the
+// saved pages it is in the repository, so the reader is also tested in CI.
+test('the sample listing is read completely', () => {
+  const html = readFileSync(join(__dirname, 'pages/sample-listing.html'), 'utf8');
+  const result = extract(parse(html), 'https://www.sahibinden.com/ilan/ornek-1000000001/detay');
+  expect(result).toMatchObject({ recognised: true, notices: [] });
+  expect(result.read).toMatchObject({
+    id: '1000000001',
+    title: 'Örnek ilan: bakımlı hatchback',
+    price: 735_000,
+    brand: 'Renault',
+    series: 'Clio',
+    model: '1.5 dCi Touch',
+    year: 2018,
+    km: 96_000,
+    fuel: 'Dizel',
+    gearbox: 'Manuel',
+    engine: '1461 cc',
+    heavyDamage: false,
+    damageRecordTL: null,
+    description: 'Aracımız bakımlıdır.\nPert kaydı yoktur.\nTakasa açık, acil satılık.',
+  });
+  expect(result.read.parts).toMatchObject({
+    roof: 'original',
+    leftRearFender: 'painted',
+    rightFrontDoor: 'localPaint',
+    trunk: 'replaced',
+  });
+  expect(Object.values(result.read.parts)).not.toContain('unknown');
+});
