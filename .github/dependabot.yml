@@ -1,4 +1,6 @@
-# Weekly update pull requests. CI and CodeQL check each one before it is merged.
+# Weekly update pull requests. Each one needs the owner's approval before it is merged.
+# New releases wait seven days, so a compromised one has time to be noticed. This does not delay
+# security updates.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -6,6 +8,8 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types: [minor, patch]
@@ -13,6 +17,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ['*']
