@@ -1,8 +1,13 @@
 {
   "name": "used-car-scorer",
   "private": true,
+  "license": "UNLICENSED",
   "version": "0.1.0",
   "description": "Chrome extension that scores an open used car listing and compares saved ones",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keremeersoy/used-car-scorer.git"
+  },
   "type": "module",
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
@@ -10,23 +15,34 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "build": "vite build",
-    "check": "npm test && npm run typecheck && npm run build && npm audit --audit-level=high"
+    "check": "npm run lint && npm test && npm run typecheck && npm run build && npm audit --audit-level=high",
+    "prepare": "husky"
   },
   "dependencies": {
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.9",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@types/chrome": "^0.3.8",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^26.6.11",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "husky": "^9.1.7",
     "jsdom": "^31.0.1",
+    "lint-staged": "^17.6.2",
     "typescript": "^7.0.2",
     "vite": "^8.4.0",
     "vitest": "^5.1.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,json,css,html}": "biome check --write --no-errors-on-unmatched"
   }
 }

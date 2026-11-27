@@ -59,12 +59,12 @@ Aynı sekmede başka bir ilana geçtiysen **Tekrar oku** yeterli; yeni sekmede s
 
 ## Puanlama
 
-| Bölüm | Ağırlık | Özet |
-|---|---|---|
-| Hasar | 35 | Boyalı ve değişen parçalar, tramer, ağır hasar kaydı |
-| Fiyat | 30 | Elle girilen referans, yoksa benzer en az 5 kayıtlı ilanın ortanca fiyatı |
-| Km | 25 | Yıllık ortalama kilometre |
-| Açıklama | 10 | Uyarı ifadeleri |
+| Bölüm    | Ağırlık | Özet                                                                      |
+| -------- | ------- | ------------------------------------------------------------------------- |
+| Hasar    | 35      | Boyalı ve değişen parçalar, tramer, ağır hasar kaydı                      |
+| Fiyat    | 30      | Elle girilen referans, yoksa benzer en az 5 kayıtlı ilanın ortanca fiyatı |
+| Km       | 25      | Yıllık ortalama kilometre                                                 |
+| Açıklama | 10      | Uyarı ifadeleri                                                           |
 
 Referans yoksa fiyat bölümü dışarıda bırakılır ve puan 100'e oranlanır. Fiyatlar satış fiyatı değil,
 ilanda istenen fiyatlardır. Tüm sayılar ve kelime listeleri
@@ -80,13 +80,13 @@ npm run check
 Testleri, tip kontrolünü, derlemeyi ve bağımlılık taramasını birlikte çalıştırır. GitHub'da her
 gönderimde bunlar ve CodeQL güvenlik analizi çalışır; Dependabot haftalık güncelleme önerir.
 
-| Klasör | İçerik |
-|---|---|
-| `src/extract` | İlan sayfasını okuma |
-| `src/scoring` | Puanlama ve ayarları |
-| `src/draft`, `src/storage` | Düzenleme ve kayıt |
-| `src/read` | Tıklamadan sayfa kopyasına giden akış |
-| `src/ui` | Yan panel ve karşılaştırma ekranı (tüm Türkçe metinler `strings.ts` içinde) |
+| Klasör                     | İçerik                                                                      |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `src/extract`              | İlan sayfasını okuma                                                        |
+| `src/scoring`              | Puanlama ve ayarları                                                        |
+| `src/draft`, `src/storage` | Düzenleme ve kayıt                                                          |
+| `src/read`                 | Tıklamadan sayfa kopyasına giden akış                                       |
+| `src/ui`                   | Yan panel ve karşılaştırma ekranı (tüm Türkçe metinler `strings.ts` içinde) |
 
 Kod ve yorumlar İngilizce, arayüz Türkçedir.
 

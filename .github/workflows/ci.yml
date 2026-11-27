@@ -6,7 +6,7 @@ on:
   pull_request:
   # A weekly run finds newly published problems in dependencies even without changes.
   schedule:
-    - cron: '17 6 * * 1'
+    - cron: "17 6 * * 1"
 
 permissions:
   contents: read
@@ -19,13 +19,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run lint
       # The saved listing pages are not in the repository, so the page tests are skipped here.
       - run: npm test
       - run: npm run typecheck
       - run: npm run build
       - run: npm audit --audit-level=high
+      - name: Check commit messages
+        if: github.event_name == 'pull_request'
+        run: npx --no -- commitlint --from "$BASE" --to "$HEAD"
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
