@@ -52,8 +52,7 @@ export const config: Config = {
     unknownRecord: 5,
     unknownHeavy: 5,
     incompleteCap: 15,
-    // PROVISIONAL: the usual body panels, so the form can be filled by hand.
-    // Plan Task 9 checks keys and labels against the saved listing pages.
+    // The panels in the paint diagram of a listing page.
     parts: [
       { key: 'roof', label: 'Tavan' },
       { key: 'hood', label: 'Motor kaputu' },
