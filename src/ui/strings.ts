@@ -267,10 +267,13 @@ export const findingText = {
   painted: (names: string[]) => counted(names.length, 'boyalı', names.join(', ')),
   localPaint: (names: string[]) => counted(names.length, 'lokal boyalı', names.join(', ')),
   record: (amount: number) => `Hasar kaydı (tramer): ${formatMoney(amount)}`,
-  veryCheap: (percent: number) =>
-    `Referanstan %${formatNumber(percent, 0)} ucuz: nedenini satıcıya sor`,
-  cheap: (percent: number) => `İyi fiyat: referanstan %${formatNumber(percent, 0)} ucuz`,
-  expensive: (percent: number) => `Referanstan %${formatNumber(percent, 0)} pahalı`,
+  veryCheap: (percent: number, basis: string) =>
+    `${basis} %${formatNumber(percent, 0)} ucuz: nedenini satıcıya sor`,
+  cheap: (percent: number, basis: string) =>
+    `İyi fiyat: ${basis.toLocaleLowerCase('tr-TR')} %${formatNumber(percent, 0)} ucuz`,
+  expensive: (percent: number, basis: string) => `${basis} %${formatNumber(percent, 0)} pahalı`,
+  /** What the price was compared with, as the start of a sentence. */
+  basis: { manual: 'Referanstan', median: 'Benzerlerinden' },
   kmVeryHigh: (perYear: number) => `Km çok yüksek: yılda ${formatNumber(perYear, 0)} km`,
   kmHigh: (perYear: number) => `Km yüksek: yılda ${formatNumber(perYear, 0)} km`,
   kmLow: (perYear: number) => `Km düşük: yılda ${formatNumber(perYear, 0)} km`,
@@ -316,7 +319,8 @@ function noReferenceText(
   if (reason.why === 'heavy') return 'ağır hasarlı araç emsallerle kıyaslanmaz';
   if (reason.why === 'parts') return 'boya bilgisi eksik olduğu için gruplanamıyor';
   const group = own ? `${conditionLabels[own]} grubunda ` : '';
-  return `${group}yalnızca ${reason.found} benzer araç var, en az ${config.price.lowComparables} gerekli`;
+  const more = config.price.lowComparables - reason.found;
+  return `${group}${reason.found} benzer araç var. Sonuç için aynı paketten ${more} ilan daha aç`;
 }
 
 /** The price comparison in one or two sentences. */

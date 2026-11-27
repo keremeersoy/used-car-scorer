@@ -7,6 +7,7 @@ import {
   initialState,
   keepCurrent,
   receive,
+  receiveAuto,
 } from '../src/ui/panel/panelState';
 import { listing, NOW, page } from './helpers';
 
@@ -74,4 +75,22 @@ test('a draft expects to replace only the entry it was started from', () => {
   const reread = receive(initialState, incoming({ id: '7' }), saved).draft!;
   expect(expectedEntry(reread)).toEqual(saved[0]);
   expect(expectedEntry(editField(reread, 'id', '8'))).toBeNull();
+});
+
+const auto = (o: Partial<Listing> = {}) => incoming(o);
+
+test('an automatic read of the shown listing replaces it only when the page says more', () => {
+  const partial = receive(initialState, auto({ price: 900_000, parts: {} }), []);
+  const same = receiveAuto(partial, auto({ price: 900_000, parts: {} }), []);
+  expect(same).toBe(partial);
+  const completed = receiveAuto(partial, auto({ price: 900_000 }), []);
+  expect(completed.draft!.listing.parts.roof).toBe('original');
+  const dropped = receiveAuto(completed, auto({ price: 850_000 }), []);
+  expect(dropped.draft!.listing.price).toBe(850_000);
+});
+
+test('a saved listing read again with nothing new stays as it is', () => {
+  const stored = [listing({ km: 5, editedFields: ['km'], note: 'x' })];
+  const shown = receive(initialState, auto(), stored);
+  expect(receiveAuto(shown, auto(), stored)).toBe(shown);
 });

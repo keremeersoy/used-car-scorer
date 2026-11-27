@@ -60,7 +60,7 @@ The icon click is what grants access. According to Chrome's docs the grant lasts
 
 **Unverified assumption:** that the grant from `action.onClicked` lets the side panel page run `executeScript`. The first build step must prove this in a real Chrome. If it fails, stop and tell the owner. Do not add host permissions.
 
-**Automatic reading (added later, approved by the owner).** Off until the owner turns it on in the panel and grants the optional access. While it is on and the panel is open, a listing's detail page is read when it finishes loading in the active tab or when its tab becomes active. Other pages are left alone. Coming back to the listing already shown keeps it, with any typed values; a different listing waits if there are unsaved edits. Turning it off removes the access. This replaces "only on a click" for listing pages only.
+**Automatic reading (added later, approved by the owner).** Off until the owner turns it on in the panel and grants the optional access. While it is on and the panel is open, a listing's detail page is read when it finishes loading in the active tab or when its tab becomes active. Other pages are left alone. Coming back to the listing already shown keeps it, with any typed values, unless it has no unsaved edits and the page now says something else (it was still loading, or it changed); a different listing waits if there are unsaved edits. Turning it off removes the access. This replaces "only on a click" for listing pages only.
 
 ### 5.2 Panel
 

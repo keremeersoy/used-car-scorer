@@ -1,4 +1,10 @@
-import { type Draft, draftFromPage, draftFromSaved, emptyDraft } from '../../draft/draft';
+import {
+  type Draft,
+  draftFromPage,
+  draftFromSaved,
+  emptyDraft,
+  samePageData,
+} from '../../draft/draft';
 import type { ExtractNotice, ExtractResult } from '../../extract/types';
 import type { Listing } from '../../types';
 
@@ -54,9 +60,15 @@ export function receive(
 export function receiveAuto(state: PanelState, result: ReadResult, saved: Listing[]): PanelState {
   if (result.kind !== 'page' || !result.recognised) return state;
   const { draft } = state;
-  const shown = draft !== null && draft.listing.id === result.read.id;
-  if (shown && (draft.dirty || draft.fromPage)) {
-    return state.pending ? { ...state, pending: null } : state;
+  if (draft !== null && draft.listing.id === result.read.id) {
+    const unchanged = () => {
+      const fresh = draftFromPage(result.read, findById(saved, result.read.id));
+      // A page that now says more, or something else, was still loading or has changed.
+      return draft.fromPage && samePageData(fresh.listing, draft.listing);
+    };
+    if (draft.dirty || unchanged()) {
+      return state.pending ? { ...state, pending: null } : state;
+    }
   }
   return receive(state, result, saved);
 }

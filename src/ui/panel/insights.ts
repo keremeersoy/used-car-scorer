@@ -71,13 +71,14 @@ export function findings(
     const percent = Math.abs(reason.diff) * 100;
     const cost = result.sections.price.max - (result.sections.price.points ?? 0);
     const caution = reason.lowData ? ' (az veriyle)' : '';
+    const basis = findingText.basis[reason.source];
     if (reason.band === 'veryCheap') {
-      found.push({ tone: 'warn', text: findingText.veryCheap(percent) + caution, cost });
+      found.push({ tone: 'warn', text: findingText.veryCheap(percent, basis) + caution, cost });
     } else if (reason.band === 'good') {
-      found.push({ tone: 'good', text: findingText.cheap(percent) + caution });
+      found.push({ tone: 'good', text: findingText.cheap(percent, basis) + caution });
     } else if (reason.band !== 'normal') {
       const tone = reason.band === 'expensive' ? 'bad' : 'warn';
-      found.push({ tone, text: findingText.expensive(percent) + caution, cost });
+      found.push({ tone, text: findingText.expensive(percent, basis) + caution, cost });
     }
   }
 

@@ -1,6 +1,6 @@
 import { config } from '../src/scoring/config';
 import type { PriceBand } from '../src/scoring/types';
-import { reasonText, warningText } from '../src/ui/strings';
+import { marketText, reasonText, warningText } from '../src/ui/strings';
 
 const price = (band: PriceBand) =>
   reasonText(
@@ -53,4 +53,10 @@ test('the part list covers the roof and has no duplicate keys', () => {
   const keys = config.damage.parts.map((part) => part.key);
   expect(keys).toContain(config.damage.roofPart);
   expect(new Set(keys).size).toBe(keys.length);
+});
+
+test('too few similar cars says how many more are needed', () => {
+  expect(marketText({ code: 'noReference', found: 1, why: 'few' }, 'clean')).toBe(
+    'Temiz grubunda 1 benzer araç var. Sonuç için aynı paketten 2 ilan daha aç.',
+  );
 });

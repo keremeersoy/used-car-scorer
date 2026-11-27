@@ -33,6 +33,18 @@ const DATA_FIELDS = [
 
 const PART_PREFIX = 'parts.';
 
+/** Whether two listings show the same car data; an unknown part equals a missing one. */
+export function samePageData(a: ListingData, b: ListingData): boolean {
+  const fingerprint = (listing: ListingData) =>
+    JSON.stringify([
+      DATA_FIELDS.map((field) => listing[field]),
+      Object.entries(listing.parts)
+        .filter(([, status]) => status !== 'unknown')
+        .sort(([one], [other]) => one.localeCompare(other)),
+    ]);
+  return fingerprint(a) === fingerprint(b);
+}
+
 const blank = (url: string): Draft['listing'] => ({
   id: '',
   url,

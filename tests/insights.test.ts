@@ -61,3 +61,12 @@ test('unknown values are listed as missing, never praised', () => {
     'Boyalı veya değişen parça yok',
   );
 });
+
+test('a price finding says whether it compares with similar cars or a typed reference', () => {
+  const typed = read({ referencePrice: 800_000 }).findings;
+  expect(typed.some((f) => f.text.startsWith('Referanstan %25 pahalı'))).toBe(true);
+  const peers = [1, 2, 3].map((n) => listing({ id: `p${n}`, price: 800_000 }));
+  const result = scoreListing(listing(), peers, NOW, testCfg);
+  const found = findings(listing(), result, (key) => key, testCfg);
+  expect(found.some((f) => f.text.startsWith('Benzerlerinden %25 pahalı'))).toBe(true);
+});

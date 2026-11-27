@@ -494,7 +494,7 @@ const browse = async (fake: ReturnType<typeof fakeChrome>, number: number, price
 test('listings looked at become the price comparison, and can be forgotten', async () => {
   const { fake } = await autoPanel();
   await browse(fake, 2, '700.000 TL');
-  expect(text()).toContain('yalnızca 0 benzer araç');
+  expect(text()).toContain('0 benzer araç var. Sonuç için aynı paketten 3 ilan daha aç.');
   await browse(fake, 3, '710.000 TL');
   await browse(fake, 4, '720.000 TL');
   await browse(fake, 5, '800.000 TL');
