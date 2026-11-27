@@ -58,15 +58,27 @@ export function App() {
   const { listings, error, load, save, remove, restore } = useListings();
   const begin = useRef(createSequence()).current;
 
+  // The clicked read that is still running, if any.
+  const clickedRead = useRef<{ tabId: number } | null>(null);
+
   const read = useCallback(
     async (tabId: number, how: typeof receive | typeof receiveAuto = receive) => {
+      // An automatic read stays quiet about unreadable pages, so it must not replace a click.
+      if (how === receiveAuto && clickedRead.current?.tabId === tabId) return;
+      const click = how === receive ? { tabId } : null;
+      if (click) clickedRead.current = click;
       const isCurrent = begin();
-      const result = toResult(await readTab(tabId, chromeTabApi));
-      // Read the saved data now, so typed values are merged even right after the panel opens.
-      const saved = (await load()) ?? [];
-      if (!isCurrent()) return;
-      setState((current) => how(current, result, saved));
-      setTab('listing');
+      try {
+        const result = toResult(await readTab(tabId, chromeTabApi));
+        // Read the saved data now, so typed values are merged even right after the panel opens.
+        const saved = (await load()) ?? [];
+        if (!isCurrent()) return;
+        setState((current) => how(current, result, saved));
+        setTab('listing');
+      } finally {
+        // Cleared even when overtaken, or this tab would never be read automatically again.
+        if (click && clickedRead.current === click) clickedRead.current = null;
+      }
     },
     [begin, load],
   );

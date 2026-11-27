@@ -269,11 +269,15 @@ test('a backup with one broken entry loads the rest and names the broken one', a
 });
 
 const LISTING_7 = 'https://www.sahibinden.com/ilan/test-ilani-1000000007/detay';
-const visit = async (fake: ReturnType<typeof fakeChrome>, url: string, id: string) => {
+const visit = async (fake: ReturnType<typeof fakeChrome>, url: string, id: string, tabId = 5) => {
   fake.hooks.tabUrl = url;
   fake.hooks.copy = async () => ({ html: PAGE_7.replace('>7<', `>${id}<`), url });
   await act(async () => {
-    fake.chrome.tabs.onUpdated.emit(5, { status: 'complete' }, { active: true, windowId: 1, url });
+    fake.chrome.tabs.onUpdated.emit(
+      tabId,
+      { status: 'complete' },
+      { active: true, windowId: 1, url },
+    );
   });
   await settle();
 };
@@ -333,4 +337,53 @@ test('a part is set by choosing it on the car diagram', async () => {
   await click('[data-status="painted"]');
   expect(find('[data-part="roof"]').getAttribute('data-value')).toBe('painted');
   expect(text()).toContain('Tavan');
+});
+
+const slowRead = async (fake: ReturnType<typeof fakeChrome>) => {
+  const slow = gate();
+  fake.access.granted = true;
+  fake.hooks.tabUrl = 'https://www.sahibinden.com/otomobil';
+  await start(fake);
+  fake.hooks.tabUrl = LISTING_7;
+  // A bot check: a listing address whose page cannot be read.
+  fake.hooks.copy = async () => {
+    await slow.closed;
+    return { html: '<p>', url: LISTING_7 };
+  };
+  await click('[data-action="reread"]');
+  return slow;
+};
+
+test('an automatic read of the same tab does not swallow a clicked one', async () => {
+  const fake = fakeChrome([]);
+  const slow = await slowRead(fake);
+  await act(async () => {
+    fake.chrome.tabs.onUpdated.emit(
+      5,
+      { status: 'complete' },
+      { active: true, windowId: 1, url: LISTING_7 },
+    );
+  });
+  slow.open();
+  await settle();
+  expect(text()).toContain('İlan okunamadı');
+});
+
+test('another tab is still read automatically while a clicked read is running', async () => {
+  const fake = fakeChrome([]);
+  const slow = await slowRead(fake);
+  await visit(fake, LISTING_7.replace('07/', '08/'), '8', 6);
+  slow.open();
+  await settle();
+  expect(field('id').value).toBe('8');
+});
+
+test('a tab whose clicked read was overtaken is read automatically again', async () => {
+  const fake = fakeChrome([listing({ id: '2' })]);
+  const slow = await slowRead(fake);
+  await openSaved(); // overtakes the clicked read without starting another one
+  slow.open();
+  await settle();
+  await visit(fake, LISTING_7, '7');
+  expect(field('id').value).toBe('7');
 });
