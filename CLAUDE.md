@@ -21,8 +21,10 @@ anywhere else, adds a manifest permission, sends a request to sahibinden.com, or
 
 ## Language
 
-Talk to the owner in English. Everything on GitHub (issues, pull requests, comments, commit
-messages, documentation, code) is in English. The extension's interface stays Turkish.
+Talk to the owner in Turkish. Everything on GitHub (issues, labels, pull requests, comments,
+commit messages, documentation, code) is in English; keep titles English only, and quote Turkish
+input phrases as code with a gloss in the body. Everything the extension shows is Turkish,
+including error messages.
 
 ## Process
 

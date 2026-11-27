@@ -149,7 +149,9 @@ test('saved data that cannot be read during a page read is reported and not writ
     throw new Error('disk');
   };
   await click('[data-action="reread"]');
-  expect(text()).toContain('disk');
+  expect(text()).toContain('Kayıtlı veriler okunamadı');
+  // The browser's own error text is English, so it never reaches the interface.
+  expect(text()).not.toContain('disk');
   await click('[data-action="save"]');
   expect(fake.stored()['7']!.damageRecordTL).toBe(9_000);
 });

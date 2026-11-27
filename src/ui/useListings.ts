@@ -17,10 +17,11 @@ const store = createListingStore(
   async (task) => await navigator.locks.request(STORE_KEY, task),
 );
 
-const describe = (error: unknown, failed: string) =>
-  error instanceof StorageDataError
-    ? strings.storageUnreadable
-    : `${failed} ${error instanceof Error ? error.message : String(error)}`;
+/** The text to show. The browser's own message is English, so it only goes to the console. */
+function describe(error: unknown, failed: string): string {
+  console.error(error);
+  return error instanceof StorageDataError ? strings.storageUnreadable : failed;
+}
 
 export function useListings() {
   const [listings, setListings] = useState<Listing[]>([]);
