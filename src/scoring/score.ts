@@ -1,4 +1,4 @@
-import type { Listing, Scorable } from '../types';
+import type { Listing, Observation, Scorable } from '../types';
 import { type Config, config } from './config';
 import { scoreDamage } from './damage';
 import { scoreDescription } from './description';
@@ -11,10 +11,11 @@ export function scoreListing(
   saved: Listing[],
   now: Date,
   cfg: Config = config,
+  seen: Observation[] = [],
 ): ScoreResult {
   const sections: ScoreResult['sections'] = {
     damage: scoreDamage(target, cfg),
-    price: scorePrice(target, saved, now, cfg),
+    price: scorePrice(target, saved, now, cfg, seen),
     km: scoreKm(target, now, cfg),
     description: scoreDescription(target.description, cfg),
   };

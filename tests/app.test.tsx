@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 // The panel against a fake chrome API: reading, saving and their races.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { toBackup } from '../src/storage/backup';
@@ -475,4 +477,32 @@ test('a note is saved, survives reading the page again and shows in the saved li
   expect(find<HTMLTextAreaElement>('[data-field="note"]').value).toBe('Pazarlık payı var');
   await click('[data-tab="saved"]');
   expect(find('.saved-note').textContent).toBe('Pazarlık payı var');
+});
+
+const SAMPLE = readFileSync(join(__dirname, 'pages/sample-listing.html'), 'utf8');
+const browse = async (fake: ReturnType<typeof fakeChrome>, number: number, price: string) => {
+  const url = `https://www.sahibinden.com/ilan/ornek-100000000${number}/detay`;
+  fake.hooks.tabUrl = url;
+  const html = SAMPLE.replace('1000000001', `100000000${number}`).replace('735.000 TL', price);
+  fake.hooks.copy = async () => ({ html, url });
+  await act(async () => {
+    fake.chrome.tabs.onUpdated.emit(5, { status: 'complete' }, { active: true, windowId: 1, url });
+  });
+  await settle();
+};
+
+test('listings looked at become the price comparison, and can be forgotten', async () => {
+  const { fake } = await autoPanel();
+  await browse(fake, 2, '700.000 TL');
+  expect(text()).toContain('yalnızca 0 benzer araç');
+  await browse(fake, 3, '710.000 TL');
+  await browse(fake, 4, '720.000 TL');
+  await browse(fake, 5, '800.000 TL');
+  expect(text()).toContain('Değişenli 3 benzer aracın ortancası 710.000 TL');
+  expect(text()).toContain('az veriyle');
+  await click('[data-tab="saved"]');
+  expect(text()).toContain('Hatırlanan ilan: 4');
+  await click('[data-action="clear-seen"]');
+  await click('[data-action="confirm-clear-seen"]');
+  expect(text()).toContain('Hatırlanan ilan: 0');
 });

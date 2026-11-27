@@ -27,7 +27,11 @@ export interface Config {
     normalUpTo: number; // diff <= this: normal
     highUpTo: number; // diff <= this: high, above it: expensive
     points: Record<PriceBand, number>;
-    minComparables: number;
+    minComparables: number; // a median from this many is trusted
+    lowComparables: number; // from this many it is shown, marked as little data
+    kmSpread: number;
+    cleanMaxPainted: number; // painted panels a car may have and still count as clean
+    maxSeen: number; // listings remembered for comparison
     maxAgeDays: number;
     yearSpread: number;
   };
@@ -97,6 +101,10 @@ export const config: Config = {
     highUpTo: 0.1,
     points: { veryCheap: 25, good: 30, normal: 22, high: 12, expensive: 5 },
     minComparables: 5,
+    lowComparables: 3,
+    kmSpread: 40_000,
+    cleanMaxPainted: 1,
+    maxSeen: 2_000,
     maxAgeDays: 30,
     yearSpread: 1,
   },

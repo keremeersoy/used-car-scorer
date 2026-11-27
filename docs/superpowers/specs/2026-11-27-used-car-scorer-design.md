@@ -144,15 +144,13 @@ Every unknown adds a warning. Example: all parts original, heavy damage "no", re
 
 ### 7.2 Price (30)
 
-Reference: the manual `referencePrice` if entered (above 0). Otherwise the median price of saved listings that match **all** of:
+Reference: the manual `referencePrice` if entered (above 0). Otherwise the median of **similar cars in the same condition** (changed later, approved by the owner).
 
-- same brand, series, model, engine, fuel and gearbox (trimmed, Turkish-locale case-insensitive). A blank value never matches. **Series was added to the brief's list (call)** so that equal model names in different series do not mix.
-- year within ±1
-- saved in the last 30 days
-- has a price, and is not this listing
-- not marked heavy damage = yes **(call)**
-
-At least 5 are needed.
+- Cars come from saved listings and from listings only looked at. Each listing read is remembered locally (number, address, title, brand, series, model, year, km, fuel, gearbox, price, heavy damage, parts, date; no description or seller data), one record per number, for 30 days, and can be cleared. A saved entry's corrections win; a later sight has the newer price.
+- Similar: same brand, series, model, fuel and gearbox (trimmed, Turkish-locale case-insensitive; a blank value never matches), year within ±1, km within 40,000, seen in the last 30 days, has a price, not this listing, not marked heavy damage = yes. Engine is no longer matched; the model name carries it.
+- Condition groups: **clean** (no replaced part, at most one painted or locally painted), **painted** (no replaced part, two or more painted), **replaced** (at least one replaced). A car with any unknown part is in no group. A heavily damaged car is compared with none.
+- At least 5 cars in the car's own group are trusted; 3 or 4 are used and marked as little data; fewer give no price score.
+- The panel shows all three groups with counts and medians, and the cars behind them.
 
 `diff = (price − reference) / reference`
 

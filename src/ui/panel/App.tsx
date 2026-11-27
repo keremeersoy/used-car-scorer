@@ -6,16 +6,20 @@ import { createSequence } from '../../read/latest';
 import { chromeTabApi, type ReadOutcome, readTab } from '../../read/readTab';
 import { requestKey, takeReadRequest } from '../../read/request';
 import { config } from '../../scoring/config';
+import { market } from '../../scoring/market';
 import { scoreListing } from '../../scoring/score';
 import { ConflictError } from '../../storage/listings';
+import { observationOf } from '../../storage/seen';
 import type { Listing } from '../../types';
 import { CarDiagram } from '../CarDiagram';
 import { noticeText, strings } from '../strings';
 import { useListings } from '../useListings';
+import { useSeen } from '../useSeen';
 import { Backup } from './Backup';
 import { Breakdown } from './Breakdown';
 import { findings, missingInfo, verdict } from './insights';
 import { ListingForm } from './ListingForm';
+import { MarketCard } from './MarketCard';
 import {
   afterSave,
   discardAndReplace,
@@ -29,6 +33,7 @@ import {
 } from './panelState';
 import { ReplacePrompt } from './ReplacePrompt';
 import { SavedList } from './SavedList';
+import { SeenPool } from './SeenPool';
 import { Findings, Summary } from './Summary';
 import { useAutoRead } from './useAutoRead';
 
@@ -56,6 +61,7 @@ export function App() {
   const [conflict, setConflict] = useState<Conflict | null>(null);
   const [savedRevision, setSavedRevision] = useState<number | null>(null);
   const { listings, error, load, save, remove, restore } = useListings();
+  const { seen, record, clear: clearSeen } = useSeen();
   const begin = useRef(createSequence()).current;
 
   const shownId = useRef<string | undefined>(undefined);
@@ -73,6 +79,11 @@ export function App() {
       const isCurrent = begin();
       try {
         const result = toResult(await readTab(tabId, chromeTabApi));
+        if (result.kind === 'page' && result.recognised) {
+          // Remembered for price comparison, whether or not the panel ends up showing it.
+          const sight = observationOf(result.read, new Date());
+          if (sight) void record(sight);
+        }
         // Read the saved data now, so typed values are merged even right after the panel opens.
         const saved = (await load()) ?? [];
         if (!isCurrent()) return;
@@ -86,7 +97,7 @@ export function App() {
         if (click && clickedRead.current === click) clickedRead.current = null;
       }
     },
-    [begin, load],
+    [begin, load, record],
   );
   const autoRead = useAutoRead(
     useCallback((tabId: number) => void read(tabId, receiveAuto), [read]),
@@ -166,7 +177,7 @@ export function App() {
     setState((current) => (current.draft ? { ...current, draft: apply(current.draft) } : current));
 
   const justSaved = draft !== null && !draft.dirty && savedRevision === state.revision;
-  const result = draft && scoreListing(draft.listing, listings, new Date());
+  const result = draft && scoreListing(draft.listing, listings, new Date(), config, seen);
   const alreadySaved = listings.some((listing) => listing.id === draft?.listing.id);
 
   return (
@@ -239,6 +250,10 @@ export function App() {
             <Findings
               findings={findings(draft.listing, result, partLabel, config)}
               missing={missingInfo(draft.listing, config)}
+            />
+            <MarketCard
+              market={market(draft.listing, listings, seen, new Date(), config)}
+              price={result.sections.price}
             />
             <ListingForm
               key={state.revision}
@@ -315,6 +330,7 @@ export function App() {
       <div hidden={tab !== 'saved'}>
         <SavedList
           listings={listings}
+          seen={seen}
           onOpen={(listing) => {
             begin(); // a read still in progress must not replace what was just opened
             setState((current) => receive(current, { kind: 'saved', listing }, listings));
@@ -324,6 +340,7 @@ export function App() {
         />
         {/* After a read error the list may be stale, so it is not offered for backup. */}
         <Backup listings={error ? [] : listings} onRestore={restore} />
+        <SeenPool count={seen.length} onClear={() => void clearSeen()} />
       </div>
     </main>
   );

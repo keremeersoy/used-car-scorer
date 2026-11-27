@@ -36,4 +36,22 @@ export interface PageRead extends ListingData {
   url: string;
 }
 
+/** What is remembered about a listing for price comparison. */
+export type Observation = Pick<
+  Listing,
+  | 'id'
+  | 'url'
+  | 'title'
+  | 'brand'
+  | 'series'
+  | 'model'
+  | 'year'
+  | 'km'
+  | 'fuel'
+  | 'gearbox'
+  | 'price'
+  | 'heavyDamage'
+  | 'parts'
+> & { seenAt: string };
+
 export type Scorable = ListingData & { id: string; referencePrice: number | null };

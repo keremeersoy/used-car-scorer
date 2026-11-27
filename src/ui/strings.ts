@@ -1,5 +1,6 @@
 // All Turkish copy lives here.
 import { config } from '../scoring/config';
+import type { ConditionClass } from '../scoring/market';
 import type { PriceBand, Reason, SectionKey, Warning } from '../scoring/types';
 import type { Rejected } from '../storage/backup';
 import type { Listing, PartStatus } from '../types';
@@ -11,7 +12,7 @@ export const strings = {
   autoReadEnable: 'Otomatik okumayı aç',
   autoReadOnHint: 'Açtığın ilanlar kendiliğinden okunuyor. Kapatmak için tıkla.',
   heavyNote: 'Ağır hasar kayıtlı.',
-  referenceHint: 'Benzer arabaların fiyatı. Boşsa kayıtlı benzer ilanlardan hesaplanır.',
+  referenceHint: 'Boşsa baktığın ve kaydettiğin benzer ilanlardan hesaplanır.',
   autoReadConsent: 'Chrome sahibinden.com için izin soracak. İstediğin zaman kapatabilirsin.',
   emptyTitle: 'Bir ilan sayfası aç',
   emptyManual: 'Sonra Chrome araç çubuğundaki eklenti simgesine tıkla.',
@@ -22,6 +23,16 @@ export const strings = {
   missingTitle: 'Henüz bilinmiyor',
   extraTitle: 'Satıcıdan öğrendiklerin',
   extraHint: 'İlanda yazmayan bilgileri ekle, puan hemen güncellensin.',
+  marketTitle: 'Fiyat kıyası',
+  thisCar: '(bu araç)',
+  peers: 'Emsaller',
+  marketHint: 'Aynı paketten başka ilanları açtıkça burada birikir.',
+  poolTitle: 'Fiyat kıyası havuzu',
+  poolHint:
+    'Baktığın ilanların fiyatı ve kaporta durumu 30 gün boyunca yalnızca bu tarayıcıda hatırlanır.',
+  poolCount: 'Hatırlanan ilan:',
+  poolClear: 'Havuzu temizle',
+  poolClearConfirm: 'Evet, temizle',
   bodyTitle: 'Kaporta',
   noteHint: 'Sadece sende kalır. Satıcıyla konuştukların, pazarlık, randevu…',
   bodyHint: 'Durumunu değiştirmek için bir parçayı seç.',
@@ -195,12 +206,17 @@ export function reasonText(reason: Reason, partLabel: (key: string) => string): 
     case 'priceBand': {
       const sign = reason.diff > 0 ? '+' : reason.diff < 0 ? '−' : '';
       const percent = formatNumber(Math.abs(reason.diff) * 100);
+      const group = reason.condition
+        ? `${conditionLabels[reason.condition].toLocaleLowerCase('tr-TR')} `
+        : '';
       const source =
-        reason.source === 'manual' ? 'elle girildi' : `${reason.count} ilanın ortanca fiyatı`;
+        reason.source === 'manual'
+          ? 'elle girildi'
+          : `${reason.count} ilanın ortanca fiyatı, ${group}araçlar${reason.lowData ? ', az veriyle' : ''}`;
       return `${bandLabels[reason.band]}: referansa göre ${sign}%${percent} (${formatMoney(reason.reference)}, ${source})`;
     }
     case 'noReference':
-      return `${strings.insufficient}: ${reason.found} benzer ilan var, en az ${config.price.minComparables} gerekli`;
+      return `${strings.insufficient}: ${noReferenceText(reason, null)}`;
     case 'kmPerYear':
       return `Yılda ortalama ${formatNumber(reason.value, 0)} km`;
     case 'phrase': {
@@ -283,4 +299,37 @@ export function factList(car: Pick<Listing, 'year' | 'km' | 'fuel' | 'gearbox'>)
     car.fuel,
     car.gearbox,
   ].filter((fact): fact is string => Boolean(fact));
+}
+
+export const conditionLabels: Record<ConditionClass, string> = {
+  clean: 'Temiz',
+  painted: 'Boyalı',
+  replaced: 'Değişenli',
+};
+
+type PriceReason = Extract<Reason, { code: 'priceBand' | 'noReference' }>;
+
+function noReferenceText(
+  reason: Extract<Reason, { code: 'noReference' }>,
+  own: ConditionClass | null,
+): string {
+  if (reason.why === 'heavy') return 'ağır hasarlı araç emsallerle kıyaslanmaz';
+  if (reason.why === 'parts') return 'boya bilgisi eksik olduğu için gruplanamıyor';
+  const group = own ? `${conditionLabels[own]} grubunda ` : '';
+  return `${group}yalnızca ${reason.found} benzer araç var, en az ${config.price.lowComparables} gerekli`;
+}
+
+/** The price comparison in one or two sentences. */
+export function marketText(reason: PriceReason, own: ConditionClass | null): string {
+  if (reason.code === 'noReference') {
+    const text = noReferenceText(reason, own);
+    return `${text.charAt(0).toLocaleUpperCase('tr-TR')}${text.slice(1)}.`;
+  }
+  const sign = reason.diff > 0 ? '+' : reason.diff < 0 ? '−' : '';
+  const band = `${bandLabels[reason.band]} (${sign}%${formatNumber(Math.abs(reason.diff) * 100)}).`;
+  const amount = formatMoney(reason.reference);
+  if (reason.source === 'manual') return `${band} Elle girdiğin referans: ${amount}.`;
+  const group = reason.condition ? `${conditionLabels[reason.condition]} ` : '';
+  const caution = reason.lowData ? ' Bu sonuç az veriyle çıktı.' : '';
+  return `${band} ${group}${reason.count} benzer aracın ortancası ${amount}.${caution}`;
 }

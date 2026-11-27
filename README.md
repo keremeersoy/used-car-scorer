@@ -25,6 +25,8 @@ Save listings and compare them side by side. The interface is in Turkish.
 - The score updates as you type, and every section explains itself.
 - A missing value is never treated as clean.
 - Keep your own note on each listing.
+- Compares the asking price with similar cars you have looked at or saved, grouped as clean,
+  painted or with replaced parts.
 - Compare, delete, back up and restore saved listings.
 - All data stays in the browser. No server, no analytics.
 
@@ -73,7 +75,7 @@ With **Otomatik oku** on, just browse: each listing appears in the panel. Withou
 | Section | Weight | Based on |
 |---|---|---|
 | Damage | 35 | Painted and replaced parts, damage record amount, heavy damage record |
-| Price | 30 | A reference price you enter, otherwise the median of at least 5 similar saved listings |
+| Price | 30 | A reference price you enter, otherwise the median of similar cars in the same body condition |
 | Km | 25 | Average kilometres per year |
 | Description | 10 | Warning phrases, with Turkish negation handling |
 

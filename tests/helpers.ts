@@ -1,5 +1,5 @@
 import { type Config, config } from '../src/scoring/config';
-import type { Listing, PageRead, PartStatus } from '../src/types';
+import type { Listing, Observation, PageRead, PartStatus } from '../src/types';
 
 export const NOW = new Date('2026-11-27T12:00:00Z');
 
@@ -48,4 +48,27 @@ export function page(overrides: Partial<Listing> = {}): PageRead {
     ...read
   } = listing(overrides);
   return read;
+}
+
+/** The same listing as it is remembered after only being looked at. */
+export function observation(overrides: Partial<Listing> = {}): Observation {
+  const car = listing(overrides);
+  const { id, url, title, brand, series, model, year, km, fuel, gearbox, price } = car;
+  const { heavyDamage, parts, savedAt: seenAt } = car;
+  return {
+    id,
+    url,
+    title,
+    brand,
+    series,
+    model,
+    year,
+    km,
+    fuel,
+    gearbox,
+    price,
+    heavyDamage,
+    parts,
+    seenAt,
+  };
 }

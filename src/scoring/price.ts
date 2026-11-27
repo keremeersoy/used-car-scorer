@@ -1,51 +1,33 @@
-import type { Listing, Scorable } from '../types';
+import type { Listing, Observation, Scorable } from '../types';
 import type { Config } from './config';
+import { type ConditionClass, market } from './market';
 import type { PriceBand, SectionResult } from './types';
 
 export type Reference =
-  | { value: number; source: 'manual' | 'median'; count: number | null }
-  | { value: null; found: number };
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-// Series is matched so that equal model names in different series do not mix.
-const MATCH_FIELDS = ['brand', 'series', 'model', 'engine', 'fuel', 'gearbox'] as const;
-
-const normalise = (value: string | null) => value?.trim().toLocaleLowerCase('tr-TR') ?? '';
-
-function isComparable(target: Scorable, other: Listing, now: Date, cfg: Config): boolean {
-  if (other.id === target.id || other.heavyDamage === true) return false;
-  if (other.price === null || other.price <= 0) return false;
-  if (target.year === null || other.year === null) return false;
-  if (Math.abs(other.year - target.year) > cfg.price.yearSpread) return false;
-  const age = now.getTime() - Date.parse(other.savedAt);
-  // Written this way so that an unreadable date (NaN) is left out too.
-  if (!(age <= cfg.price.maxAgeDays * DAY_MS)) return false;
-  return MATCH_FIELDS.every((field) => {
-    const wanted = normalise(target[field]);
-    return wanted !== '' && wanted === normalise(other[field]); // a blank value never matches
-  });
-}
-
-function median(values: number[]): number {
-  const sorted = [...values].sort((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 1 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
-}
+  | { value: number; source: 'manual'; count: null }
+  | { value: number; source: 'median'; count: number; condition: ConditionClass; lowData: boolean }
+  | { value: null; found: number; why: 'few' | 'heavy' | 'parts' };
 
 export function findReference(
   target: Scorable,
   saved: Listing[],
   now: Date,
   cfg: Config,
+  seen: Observation[] = [],
 ): Reference {
   if (target.referencePrice !== null && target.referencePrice > 0) {
     return { value: target.referencePrice, source: 'manual', count: null };
   }
-  const prices = saved
-    .filter((other) => isComparable(target, other, now, cfg))
-    .map((other) => other.price!);
-  if (prices.length < cfg.price.minComparables) return { value: null, found: prices.length };
-  return { value: median(prices), source: 'median', count: prices.length };
+  const { own, groups } = market(target, saved, seen, now, cfg);
+  if (own === null) {
+    return { value: null, found: 0, why: target.heavyDamage === true ? 'heavy' : 'parts' };
+  }
+  const { count, median } = groups[own];
+  if (median === null || count < cfg.price.lowComparables) {
+    return { value: null, found: count, why: 'few' };
+  }
+  const lowData = count < cfg.price.minComparables;
+  return { value: median, source: 'median', count, condition: own, lowData };
 }
 
 function bandFor(diff: number, cfg: Config): PriceBand {
@@ -61,18 +43,19 @@ export function scorePrice(
   saved: Listing[],
   now: Date,
   cfg: Config,
+  seen: Observation[] = [],
 ): SectionResult {
   const max = cfg.weights.price;
   const { price } = target;
   // Without its own price there is nothing to compare, which is not a lack of references.
   if (price === null || price <= 0) return { points: null, max, reasons: [], warnings: [] };
 
-  const reference = findReference(target, saved, now, cfg);
+  const reference = findReference(target, saved, now, cfg, seen);
   if (reference.value === null) {
     return {
       points: null,
       max,
-      reasons: [{ code: 'noReference', found: reference.found }],
+      reasons: [{ code: 'noReference', found: reference.found, why: reference.why }],
       warnings: ['noReference'],
     };
   }
@@ -90,6 +73,10 @@ export function scorePrice(
         reference: reference.value,
         source: reference.source,
         count: reference.count,
+        ...(reference.source === 'median' && {
+          condition: reference.condition,
+          lowData: reference.lowData,
+        }),
       },
     ],
     warnings: [],

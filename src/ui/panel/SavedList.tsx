@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
-import type { Listing } from '../../types';
+import type { Listing, Observation } from '../../types';
 import { compareUrl } from '../compare/url';
 import { ScoreRing } from '../ScoreRing';
 import { factList, formatMoney, strings, verdictText } from '../strings';
@@ -9,10 +9,12 @@ import { verdict } from './insights';
 
 export function SavedList({
   listings,
+  seen,
   onOpen,
   onRemove,
 }: {
   listings: Listing[];
+  seen: Observation[];
   onOpen: (listing: Listing) => void;
   onRemove: (id: string) => void;
 }) {
@@ -22,7 +24,7 @@ export function SavedList({
   const now = new Date();
   // Best first; listings without a score go last.
   const ranked = listings
-    .map((listing) => ({ listing, result: scoreListing(listing, listings, now) }))
+    .map((listing) => ({ listing, result: scoreListing(listing, listings, now, config, seen) }))
     .sort((a, b) => (b.result.total ?? -1) - (a.result.total ?? -1));
 
   if (listings.length === 0) return <p className="empty">{strings.noSaved}</p>;

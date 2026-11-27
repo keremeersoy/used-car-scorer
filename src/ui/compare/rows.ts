@@ -1,7 +1,7 @@
 import { type Config, config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
 import type { ScoreResult, SectionKey } from '../../scoring/types';
-import type { Listing, PartStatus } from '../../types';
+import type { Listing, Observation, PartStatus } from '../../types';
 import { type Level, verdict } from '../panel/insights';
 import {
   compareLabels,
@@ -69,11 +69,12 @@ export function buildComparison(
   saved: Listing[],
   now: Date,
   cfg: Config = config,
+  seen: Observation[] = [],
 ): { columns: Column[]; rows: Row[]; missing: string[] } {
   const listings = ids.flatMap((id) => saved.find((listing) => listing.id === id) ?? []);
   const missing = ids.filter((id) => !listings.some((listing) => listing.id === id));
   // Every saved listing feeds the median, not only the compared ones.
-  const results = listings.map((listing) => scoreListing(listing, saved, now, cfg));
+  const results = listings.map((listing) => scoreListing(listing, saved, now, cfg, seen));
   const totals = results.flatMap((result) => result.total ?? []);
   const best = totals.length > 0 ? Math.max(...totals) : null;
 

@@ -559,3 +559,55 @@ button[data-action="no-record"] {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+
+/* Price comparison */
+.market-answer {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.market table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.market th,
+.market td {
+  padding: 5px 6px;
+  text-align: left;
+  font-weight: 400;
+}
+.market td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.market tr.own {
+  background: var(--sunken);
+}
+.market tr.own th,
+.market tr.own td {
+  font-weight: 700;
+}
+.market details {
+  margin-top: 10px;
+}
+.market summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.peers {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.peers li {
+  display: flex;
+  flex-direction: column;
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.peers span {
+  color: var(--muted);
+}
+.peers a {
+  color: var(--accent);
+}

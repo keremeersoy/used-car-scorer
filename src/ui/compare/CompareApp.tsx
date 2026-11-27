@@ -1,17 +1,22 @@
 import { isSahibindenUrl } from '../../read/readTab';
+import { config } from '../../scoring/config';
 import { CarDiagram } from '../CarDiagram';
 import { ScoreRing } from '../ScoreRing';
 import { sectionLabels, strings, verdictText } from '../strings';
 import { useListings } from '../useListings';
+import { useSeen } from '../useSeen';
 import { buildComparison } from './rows';
 import { parseIds } from './url';
 
 export function CompareApp() {
   const { listings, loaded, error } = useListings();
+  const { seen } = useSeen();
   const { columns, rows, missing } = buildComparison(
     parseIds(location.search),
     listings,
     new Date(),
+    config,
+    seen,
   );
   const best = (index: number) => (columns[index]?.isBest ? 'best' : undefined);
 

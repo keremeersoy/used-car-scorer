@@ -1,3 +1,5 @@
+import type { ConditionClass } from './market';
+
 export type SectionKey = 'damage' | 'price' | 'km' | 'description';
 export type PriceBand = 'veryCheap' | 'good' | 'normal' | 'high' | 'expensive';
 
@@ -17,8 +19,10 @@ export type Reason =
       reference: number;
       source: 'manual' | 'median';
       count: number | null;
+      condition?: ConditionClass;
+      lowData?: boolean;
     }
-  | { code: 'noReference'; found: number }
+  | { code: 'noReference'; found: number; why?: 'few' | 'heavy' | 'parts' }
   | { code: 'kmPerYear'; value: number; points: number }
   | { code: 'phrase'; phrase: string; sentence: string; negated: boolean; points: number };
 
