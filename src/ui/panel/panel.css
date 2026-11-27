@@ -53,3 +53,6 @@ textarea { resize: vertical; }
 .saved-title { flex: 1; overflow-wrap: anywhere; }
 .saved-score { font-size: 18px; }
 .saved-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 6px; color: var(--muted); }
+/* Without this the buttons inherit the muted text colour and look disabled. */
+.saved-meta button { color: var(--text); }
+.saved-meta button.danger { color: var(--danger); }
