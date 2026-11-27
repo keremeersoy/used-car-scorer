@@ -33,6 +33,7 @@ A private Chrome extension for comparing used cars on sahibinden.com. The owner 
 - Permissions are exactly `activeTab`, `scripting`, `storage`, `sidePanel`. No `host_permissions`, `content_scripts`, `web_accessible_resources` or `externally_connectable`.
 - `minimum_chrome_version` 116, for `sidePanel.open()` (checked against Chrome's API reference).
 - No remote code, fonts, images or analytics.
+- **Fixed extension id (added later):** the manifest carries a public `key`, so saved listings no longer depend on the folder. Changing it would hide everything saved. No private key exists.
 - Selectors come only from pages the owner saved by hand. Never guess them or fetch the site.
 - **Known risk:** the site may still detect the extension or consider it against its terms, and may restrict the account. The owner should read the terms.
 

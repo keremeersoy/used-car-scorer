@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "Araç Skoru",
   "version": "0.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt/FF7tpr1SgNc2yyP7l7+I39jOEmYZU7aEV6xZEBRIOWqnYUrTzoRZa5ZTx4oPJWfLHUnLWxOh3/EB+aENjOHCEHQ3oiqs2dTuNSCcKD9wopw60qLOeFBHyaEjFq9g+r9MBUMaI49wiYh7LZAfGEzDJQbn7vJLfGQq5WZ/WtfRg1oUI3gk9lHR5czIlSfO4TRsbSFTSiRIsbx8I3dGQulxElIqe+QejL1yksH/xfhZGCGbVDEwmq3tf43DPKbqHddccNl8hZfjvwsil0nHpt9jk09gA6RRtxEa/2YVz5WRyjE2ygW2oo19b668y0xVzqSgp9S6kRXhqqWA+wQOS/ewIDAQAB",
   "minimum_chrome_version": "116",
   "permissions": ["activeTab", "scripting", "storage", "sidePanel"],
   "action": { "default_title": "İlanı oku" },

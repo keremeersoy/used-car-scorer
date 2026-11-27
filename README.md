@@ -40,9 +40,13 @@ npm run build
 Chrome'da `chrome://extensions` sayfasını aç, **Geliştirici modu**'nu etkinleştir, **Paketlenmemiş
 öğe yükle** ile `dist/` klasörünü seç. Yeni derlemeden sonra eklentiyi yenile.
 
-Kayıtlı ilanlar, eklentinin yüklendiği klasöre bağlıdır. Klasörü taşırsan veya eklentiyi kaldırırsan
-kayıtlar kaybolur; önce **Kayıtlılar** sekmesinden **Yedek al** ile dosyaya kaydet, sonra **Yedekten
-yükle** ile geri al.
+Eklentinin kimliği sabittir (`lnlcddeibdpccfdocfclbpclhacleoph`, manifestteki açık anahtardan gelir), yani klasörü taşımak
+kayıtları etkilemez. Eklentiyi kaldırırsan kayıtlar yine silinir; önce **Kayıtlılar** sekmesinden
+**Yedek al** ile dosyaya kaydet, sonra **Yedekten yükle** ile geri al.
+
+**Sabit kimlikten önceki bir sürümden geçiyorsan:** yeni sürümü derlemeden ve eklentiyi yenilemeden
+önce **Yedek al**. Kimlik değiştiği için eski kayıtlar görünmez ve Chrome onları silebilir. Yeni
+sürümde **Yedekten yükle** ile geri getir.
 
 ## Kullanım
 
