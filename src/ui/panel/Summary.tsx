@@ -19,16 +19,23 @@ export function Summary({
   listing,
   result,
   level,
+  saved,
 }: {
   listing: Omit<Listing, 'savedAt'>;
   result: ScoreResult;
   level: Level;
+  saved: boolean;
 }) {
   const heavy = result.warnings.includes('heavyDamage');
   const facts = factList(listing);
   return (
     <section className="summary card">
       <h1>{listing.title ?? strings.untitled}</h1>
+      {saved && (
+        <p className="saved-badge" data-testid="saved-badge">
+          {strings.savedBadge}
+        </p>
+      )}
       {facts.length > 0 && (
         <ul className="facts">
           {facts.map((fact) => (

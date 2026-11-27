@@ -104,6 +104,7 @@ const settle = () =>
 async function start(fake: ReturnType<typeof fakeChrome>) {
   vi.stubGlobal('chrome', fake.chrome);
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  vi.stubGlobal('scrollTo', () => {}); // jsdom does not scroll
   Object.defineProperty(navigator, 'locks', {
     configurable: true,
     value: { request: (_: string, task: () => Promise<unknown>) => task() },
@@ -399,4 +400,58 @@ test('browsing leaves the saved list open unless a different listing appears', a
   expect(savedIsOpen()).toBe(true);
   await visit(fake, LISTING_7.replace('07/', '08/'), '8');
   expect(savedIsOpen()).toBe(false);
+});
+
+const LISTING_8 = LISTING_7.replace('07/', '08/');
+const autoPanel = async (saved: Listing[] = []) => {
+  const fake = fakeChrome(saved);
+  fake.access.granted = true;
+  fake.hooks.tabUrl = 'https://www.sahibinden.com/otomobil';
+  await start(fake);
+  const scroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+  return { fake, scroll };
+};
+
+test('a new listing starts at the top, and the same one keeps its place', async () => {
+  const { fake, scroll } = await autoPanel();
+  await visit(fake, LISTING_7, '7');
+  expect(scroll).toHaveBeenCalledWith(0, 0);
+  scroll.mockClear();
+  await visit(fake, LISTING_7, '7');
+  expect(scroll).not.toHaveBeenCalled();
+});
+
+test('the unsaved changes question is brought into view', async () => {
+  const { fake, scroll } = await autoPanel();
+  await visit(fake, LISTING_7, '7');
+  await type('km', '1000');
+  scroll.mockClear();
+  await visit(fake, LISTING_8, '8');
+  expect(text()).toContain('Kaydedilmemiş değişiklikler var');
+  expect(scroll).toHaveBeenCalledWith(0, 0);
+});
+
+test('a listing saved before says so and offers an update', async () => {
+  const { fake } = await autoPanel([listing({ id: '7' })]);
+  const saveLabel = () => find('[data-action="save"]').textContent;
+  await visit(fake, LISTING_7, '7');
+  expect(find('[data-testid="saved-badge"]').textContent).toBe('Kayıtlı');
+  expect(saveLabel()).toBe('Güncelle');
+  await visit(fake, LISTING_8, '8');
+  expect(find('[data-testid="saved-badge"]')).toBeNull();
+  expect(saveLabel()).toBe('Kaydet');
+});
+
+test('a tab closed before it can be looked at is ignored', async () => {
+  const { fake } = await autoPanel();
+  const rejections: unknown[] = [];
+  const record = (reason: unknown) => void rejections.push(reason);
+  process.on('unhandledRejection', record);
+  fake.chrome.tabs.get = async () => {
+    throw new Error('No tab with id');
+  };
+  await act(async () => void fake.chrome.tabs.onActivated.emit({ tabId: 9, windowId: 1 }));
+  await settle();
+  process.off('unhandledRejection', record);
+  expect(rejections).toEqual([]);
 });

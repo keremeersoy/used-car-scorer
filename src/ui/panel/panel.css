@@ -533,3 +533,14 @@ button[data-action="no-record"] {
   display: block;
   margin: -4px 0 14px;
 }
+
+.saved-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  border: 1px solid var(--good);
+  border-radius: 6px;
+  color: var(--good);
+  font-weight: 600;
+  font-size: 12px;
+}

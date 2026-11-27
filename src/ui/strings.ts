@@ -35,6 +35,8 @@ export const strings = {
   tabSaved: 'Kayıtlılar',
   save: 'Kaydet',
   saved: 'Kaydedildi',
+  update: 'Güncelle',
+  savedBadge: 'Kayıtlı',
   reread: 'Tekrar oku',
   compare: 'Karşılaştır',
   remove: 'Sil',

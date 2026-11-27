@@ -28,7 +28,9 @@ export function useAutoRead(read: (tabId: number) => void) {
     };
     const onActivated = async (info: { tabId: number; windowId: number }) => {
       if (info.windowId !== windowId) return;
-      consider(info.tabId, (await chrome.tabs.get(info.tabId)).url);
+      // The tab may be closed again before it can be looked at.
+      const tab = await chrome.tabs.get(info.tabId).catch(() => undefined);
+      consider(info.tabId, tab?.url);
     };
     const onUpdated = (
       tabId: number,

@@ -120,6 +120,15 @@ export function App() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: these changes make a pending question stale
   useEffect(() => setConflict(null), [state.revision, draft?.listing.id]);
 
+  // Something new at the top must be seen, even after scrolling through the previous listing.
+  useEffect(() => {
+    if (state.revision > 0) window.scrollTo(0, 0);
+  }, [state.revision]);
+  const asking = state.pending !== null;
+  useEffect(() => {
+    if (asking) window.scrollTo(0, 0);
+  }, [asking]);
+
   const canSave = draft !== null && draft.listing.id !== '' && formValid;
 
   const saving = useRef(false);
@@ -158,6 +167,7 @@ export function App() {
 
   const justSaved = draft !== null && !draft.dirty && savedRevision === state.revision;
   const result = draft && scoreListing(draft.listing, listings, new Date());
+  const alreadySaved = listings.some((listing) => listing.id === draft?.listing.id);
 
   return (
     <main>
@@ -220,7 +230,12 @@ export function App() {
         )}
         {draft && result ? (
           <>
-            <Summary listing={draft.listing} result={result} level={verdict(result, config)} />
+            <Summary
+              listing={draft.listing}
+              result={result}
+              level={verdict(result, config)}
+              saved={alreadySaved}
+            />
             <Findings
               findings={findings(draft.listing, result, partLabel, config)}
               missing={missingInfo(draft.listing, config)}
@@ -265,7 +280,7 @@ export function App() {
                     disabled={!canSave}
                     onClick={() => void saveDraft()}
                   >
-                    {justSaved ? strings.saved : strings.save}
+                    {justSaved ? strings.saved : alreadySaved ? strings.update : strings.save}
                   </button>
                   {!canSave && <small>{formValid ? strings.needId : strings.fixInvalid}</small>}
                 </>
