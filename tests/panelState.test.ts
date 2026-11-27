@@ -1,6 +1,6 @@
 import { editField, toListing } from '../src/draft/draft';
 import {
-  afterSave, discardAndReplace, initialState, keepCurrent, receive, wouldOverwrite,
+  afterSave, discardAndReplace, expectedEntry, initialState, keepCurrent, receive,
 } from '../src/ui/panel/panelState';
 import type { Listing } from '../src/types';
 import { listing, NOW, page } from './helpers';
@@ -62,11 +62,11 @@ test('opening a saved listing also respects unsaved edits', () => {
   expect(state.pending).not.toBeNull();
 });
 
-test('typing the number of a saved listing into a fresh form is flagged before overwriting', () => {
+test('a draft expects to replace only the entry it was started from', () => {
   const saved = [listing({ id: '7' })];
   const empty = receive(initialState, incoming({}, false), saved).draft!;
-  expect(wouldOverwrite(editField(empty, 'id', '7'), saved)).toBe(true);
-  expect(wouldOverwrite(editField(empty, 'id', '8'), saved)).toBe(false);
+  expect(expectedEntry(editField(empty, 'id', '7'))).toBeNull();
   const reread = receive(initialState, incoming({ id: '7' }), saved).draft!;
-  expect(wouldOverwrite(reread, saved)).toBe(false);
+  expect(expectedEntry(reread)).toEqual(saved[0]);
+  expect(expectedEntry(editField(reread, 'id', '8'))).toBeNull();
 });

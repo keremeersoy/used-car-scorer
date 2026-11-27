@@ -1,4 +1,4 @@
-import { createListingStore, STORE_KEY, StorageDataError } from '../src/storage/listings';
+import { ConflictError, createListingStore, STORE_KEY, StorageDataError } from '../src/storage/listings';
 import { listing } from './helpers';
 
 /** In-memory stand-in for chrome.storage: asynchronous, and it copies values like the real one. */
@@ -75,4 +75,22 @@ test('two panels sharing a lock keep both saves', async () => {
     createListingStore(area, lock).save(listing({ id: 'b' })),
   ]);
   expect(await createListingStore(area).getAll()).toHaveLength(2);
+});
+
+test('a save that expects an older entry is refused and changes nothing', async () => {
+  const store = createListingStore(fakeArea());
+  const first = listing({ km: 100 });
+  await store.save(first, { replacing: null });
+  await store.save({ ...first, km: 200 }, { replacing: first });
+  await expect(store.save({ ...first, km: 300 }, { replacing: first })).rejects.toThrow(ConflictError);
+  await expect(store.save(first, { replacing: null })).rejects.toThrow(ConflictError);
+  expect((await store.getAll())[0]!.km).toBe(200);
+});
+
+test('key order does not make an unchanged entry look changed', async () => {
+  const store = createListingStore(fakeArea());
+  const entry = listing();
+  await store.save(entry);
+  const reordered = Object.fromEntries(Object.entries(entry).reverse()) as unknown as typeof entry;
+  await expect(store.save(entry, { replacing: reordered })).resolves.toBeUndefined();
 });

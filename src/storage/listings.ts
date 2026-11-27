@@ -27,6 +27,17 @@ const isListing = (value: unknown): value is Listing =>
   isObject(value.parts) &&
   Array.isArray(value.editedFields);
 
+/** The saved entry is not the one the caller meant to replace. Nothing was written. */
+export class ConflictError extends Error {
+  override name = 'ConflictError';
+}
+
+// The browser does not keep key order, so keys are sorted before comparing.
+const canonical = (value: unknown) =>
+  JSON.stringify(value, (_, v) =>
+    isObject(v) ? Object.fromEntries(Object.keys(v).sort().map((key) => [key, v[key]])) : v,
+  );
+
 export interface RestoreResult {
   added: number;
   updated: number;
@@ -74,11 +85,17 @@ export function createListingStore(area: StorageArea, lock: Lock = (task) => tas
         (a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt),
       );
     },
-    async save(listing: Listing): Promise<void> {
+    /** With `replacing`, writes only if the saved entry still is that one (null: none). */
+    async save(listing: Listing, expected?: { replacing: Listing | null }): Promise<void> {
       const id = listing.id.trim();
       // '__proto__' as a key would replace the object's prototype instead of adding an entry.
       if (id === '' || id === '__proto__') throw new Error('A listing number is required to save');
       await change((listings) => {
+        // Checked inside the write, so nothing can change between the check and the write.
+        const current = Object.hasOwn(listings, id) ? listings[id] : null;
+        if (expected && canonical(current) !== canonical(expected.replacing)) {
+          throw new ConflictError('The saved entry changed');
+        }
         listings[id] = { ...listing, id };
       });
     },
@@ -86,8 +103,17 @@ export function createListingStore(area: StorageArea, lock: Lock = (task) => tas
     async restore(entries: Listing[]): Promise<RestoreResult> {
       const result: RestoreResult = { added: 0, updated: 0, skipped: 0 };
       await change((listings) => {
+        // Of entries with the same number in one file, only the newest counts.
+        const newest = new Map<string, Listing>();
         for (const entry of entries) {
           const id = entry.id.trim();
+          const other = newest.get(id);
+          if (other) result.skipped++;
+          if (!other || Date.parse(entry.savedAt) > Date.parse(other.savedAt)) {
+            newest.set(id, entry);
+          }
+        }
+        for (const [id, entry] of newest) {
           const existing = Object.hasOwn(listings, id) ? listings[id] : undefined;
           if (existing && !(Date.parse(entry.savedAt) > Date.parse(existing.savedAt))) {
             result.skipped++;

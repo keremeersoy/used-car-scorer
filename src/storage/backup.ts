@@ -18,17 +18,25 @@ const optionalText: Check = (v) => v === null || typeof v === 'string';
 const optionalNumber: Check = (v) =>
   v === null || (typeof v === 'number' && Number.isFinite(v) && v >= 0);
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}T/;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const OLDEST_YEAR = 1900;
+
 // Listing every key makes the compiler insist that a new field is checked here too.
-const FIELDS: Record<keyof Listing, Check> = {
+const fields = (now: Date): Record<keyof Listing, Check> => ({
   id: (v) => typeof v === 'string' && v.trim() !== '' && v.trim() !== '__proto__',
   url: text,
-  savedAt: (v) => typeof v === 'string' && !Number.isNaN(Date.parse(v)),
+  // A date in the future would win every later restore and never leave the price median.
+  savedAt: (v) =>
+    typeof v === 'string' && ISO_DATE.test(v) && Date.parse(v) <= now.getTime() + DAY_MS,
   title: optionalText,
   price: optionalNumber,
   brand: optionalText,
   series: optionalText,
   model: optionalText,
-  year: optionalNumber,
+  year: (v) =>
+    v === null ||
+    (Number.isInteger(v) && (v as number) >= OLDEST_YEAR && (v as number) <= now.getFullYear() + 1),
   km: optionalNumber,
   fuel: optionalText,
   gearbox: optionalText,
@@ -41,7 +49,7 @@ const FIELDS: Record<keyof Listing, Check> = {
   description: optionalText,
   referencePrice: optionalNumber,
   editedFields: (v) => Array.isArray(v) && v.every(text),
-};
+});
 
 export function toBackup(listings: Listing[], now: Date): string {
   return JSON.stringify(
@@ -51,16 +59,16 @@ export function toBackup(listings: Listing[], now: Date): string {
   );
 }
 
-function toListing(value: unknown): Listing {
+function toListing(value: unknown, checks: Record<keyof Listing, Check>): Listing {
   if (!isObject(value)) throw new BackupError('An entry is not a listing');
-  const entries = Object.entries(FIELDS).map(([field, valid]) => {
+  const entries = Object.entries(checks).map(([field, valid]) => {
     if (!valid(value[field])) throw new BackupError(`Invalid field: ${field}`);
     return [field, value[field]] as const;
   });
   return Object.fromEntries(entries) as unknown as Listing;
 }
 
-export function parseBackup(content: string): Listing[] {
+export function parseBackup(content: string, now = new Date()): Listing[] {
   let data: unknown;
   try {
     data = JSON.parse(content);
@@ -70,5 +78,6 @@ export function parseBackup(content: string): Listing[] {
   if (!isObject(data) || data.app !== APP || data.version !== 1 || !Array.isArray(data.listings)) {
     throw new BackupError('The file is not a backup of this app');
   }
-  return data.listings.map(toListing);
+  const checks = fields(now);
+  return data.listings.map((entry) => toListing(entry, checks));
 }

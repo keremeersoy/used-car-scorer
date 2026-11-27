@@ -45,6 +45,8 @@ export interface Config {
     /** Warnings joined by one of these share a negation ("pert veya ağır hasar kaydı yoktur"). */
     connectors: string[];
     connectorNouns: string[]; // words that may stand between a warning and a connector
+    connectable: string[]; // only warnings about a record or a part may share a negation
+    cancellers: string[]; // after a negator these deny or question it
     /** Extra negations that are only safe after a phrase naming a car part. */
     partNegation: {
       phrases: string[]; // names of the warnings that are about a car part
@@ -123,6 +125,8 @@ export const config: Config = {
     ],
     connectors: ['ve', 'veya', 'ya da'],
     connectorNouns: ['kayıt', 'kaydı', 'hasarı'],
+    connectable: ['ağır hasar', 'pert', 'airbag', 'şasi'],
+    cancellers: ['değil', 'değildir', 'mı', 'mi', 'mu', 'mü'],
     partNegation: {
       phrases: ['airbag', 'şasi'],
       listWords: ['podye', 'direk', 'direkler', 'tavan', 've'],

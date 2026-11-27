@@ -97,6 +97,7 @@ A full tab (`compare.html`, listing ids in the URL), one column per listing, scr
 - **Reading a saved listing again (call):** fields the owner typed or corrected keep the typed value, and the panel shows the page's value beside it when they differ, with a way to take the page's value. Fields never edited take the new page value, except that a value the page no longer states keeps the saved one. `referencePrice` is always kept. This needs `editedFields` in the record, tracked per part for `parts`.
 - Scores are never stored. They are calculated when shown, so a saved listing's score can change as the median, the current year or the config changes **(call)**.
 - Storage errors are shown, never swallowed.
+- A save replaces a saved entry only if it is still the one the draft started from; otherwise the owner is asked.
 - **Backup (added later):** the saved list can be exported to a JSON file and restored from one. A restore checks every field and replaces a saved entry only with a newer one.
 
 ## 6. Data model
@@ -180,7 +181,7 @@ The panel shows which reference was used, and for a median how many listings it 
 
 - Start at 10, subtract 3 for each **distinct** phrase with at least one non-negated match, floor 0 **(call: distinct, not every occurrence)**.
 - Default warnings: "ağır hasar", "pert", "airbag", "şasi", "motor arızalı", "acil". Other spellings belong to one warning and are charged once: "egirbek" and "airbek" for airbag, "şase" for şasi (added by the owner after real pages). Spellings typed without Turkish letters ("sasi", "agir hasar") match too.
-- Warnings joined by "ve", "veya" or "ya da" share one negation. A list of parts written with commas stays one clause.
+- Warnings joined by "ve", "veya" or "ya da" share one negation, only between bare record or part warnings (never "motor arızalı" or "acil", never "ağır hasarlı ve …"). A negator followed by "değil" or a question particle clears nothing. A list of parts written with commas stays one clause.
 - Every match in a clause is checked; the clause is cleared only if all of them are negated. In a list of parts ("şase podye airbag hatasız") the other part names do not separate a part warning from its negator.
 - Matching is Turkish-locale lowercase and must start at a word boundary that understands Turkish letters. Suffixes are allowed. Without this, "pert" would match inside "ekspertiz".
 - Negation: a match is negated only when a negator follows it in the same clause with nothing but filler words in between ("pert kaydı yoktur"), so "pert kayıtlı motor sorunsuz" still counts. Negators: "yok", "yoktur", "değil", "değildir", "bulunmamaktadır", "bulunmuyor". "hatasız" and "sorunsuz" (added by the owner) clear only phrases that name a part (airbag, şasi and the airbag spellings). The word lists are in the config. Clauses end at `. ! ? ; ,` or a line break. **(tightened after the final review)** Unclear cases count against the listing.

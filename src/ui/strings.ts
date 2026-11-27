@@ -21,7 +21,7 @@ export const strings = {
   unsaved: 'Kaydedilmemiş değişiklikler var',
   discard: 'Vazgeç ve değiştir',
   stay: 'Burada kal',
-  overwrite: 'Bu ilan numarası zaten kayıtlı. Üzerine yazılsın mı?',
+  overwrite: 'Bu ilan numarasındaki kayıt farklı veya değişmiş. Üzerine yazılsın mı?',
   overwriteConfirm: 'Üzerine yaz',
   needId: 'Kaydetmek için ilan numarası gerekli.',
   fixInvalid: 'Kaydetmek için geçersiz alanları düzeltin.',

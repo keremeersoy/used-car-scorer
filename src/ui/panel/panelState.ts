@@ -60,7 +60,12 @@ export function afterSave(state: PanelState, saved: Listing[]): PanelState {
   if (state.pending) return show(state, state.pending, saved);
   if (!state.draft) return state;
   const entry = findById(saved, state.draft.listing.id.trim());
-  const draft = { ...state.draft, dirty: false, savedAt: entry?.savedAt ?? state.draft.savedAt };
+  const draft = {
+    ...state.draft,
+    dirty: false,
+    savedAt: entry?.savedAt ?? state.draft.savedAt,
+    base: entry ?? state.draft.base,
+  };
   return { ...state, draft };
 }
 
@@ -75,11 +80,10 @@ export function savedWhileEditing(
 ): PanelState {
   const entry = findById(saved, writtenId);
   if (!entry || state.draft?.listing.id.trim() !== writtenId) return state;
-  return { ...state, draft: { ...state.draft, savedAt: entry.savedAt } };
+  return { ...state, draft: { ...state.draft, savedAt: entry.savedAt, base: entry } };
 }
 
-/** True when saving would replace an entry this draft was not started from. */
-export function wouldOverwrite(draft: Draft, saved: Listing[]): boolean {
-  const entry = findById(saved, draft.listing.id.trim());
-  return entry !== undefined && entry.savedAt !== draft.savedAt;
+/** The saved entry that saving this draft is allowed to replace, if any. */
+export function expectedEntry(draft: Draft): Listing | null {
+  return draft.base && draft.base.id === draft.listing.id.trim() ? draft.base : null;
 }

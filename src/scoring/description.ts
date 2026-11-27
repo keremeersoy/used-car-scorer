@@ -76,9 +76,10 @@ function rulesFor(name: string, cfg: Config['description']): Rule[] {
   ];
 }
 
-function isNegated(after: string[], { negators, allows }: Rule): boolean {
-  for (const word of after) {
-    if (negators.has(word)) return true;
+function isNegated(after: string[], { negators, allows }: Rule, cancellers: Set<string>): boolean {
+  for (const [index, word] of after.entries()) {
+    // "hatasız değil" and "yok mu?" clear nothing.
+    if (negators.has(word)) return !cancellers.has(after[index + 1] ?? '');
     // Any other word means the negator is probably about something else.
     if (!allows(word)) return false;
   }
@@ -101,7 +102,9 @@ function skipJoinedWarnings(after: string[], cfg: Config['description']): string
   const split = (words: string[]) => [...allSpellings(words)].map((word) => word.split(/\s+/));
   const nouns = allSpellings(cfg.connectorNouns);
   const connectors = split(cfg.connectors);
-  const warnings = split(cfg.phrases.flat());
+  const warnings = split(
+    cfg.phrases.filter(([name]) => cfg.connectable.includes(name!)).flat(),
+  );
   // The last word of a phrase may carry a suffix.
   const startsAt = (at: number, phrase: string[]) =>
     phrase.every((word, i) => {
@@ -151,6 +154,7 @@ export function scoreDescription(text: string | null, cfg: Config): SectionResul
       rules: rulesFor(variants[0]!, cfg.description),
     }));
   const isListed = listedPart(cfg.description);
+  const cancellers = allSpellings(cfg.description.cancellers);
   const charged = new Set<string>();
   const reasons: Reason[] = [];
 
@@ -162,8 +166,14 @@ export function scoreDescription(text: string | null, cfg: Config): SectionResul
         if (matches.length === 0) continue;
         // The clause is cleared only if every mention in it is.
         const negated = matches.every((match) => {
-          const after = skipJoinedWarnings(wordsAfter(folded, match), cfg.description);
-          return rules.some((candidate) => isNegated(after, candidate));
+          // "ağır hasarlı ve …" states a fact, so only a bare warning shares a negation.
+          const bare = !/^\p{L}/u.test(folded.slice(match.index + match[0].length));
+          const words = wordsAfter(folded, match);
+          const after =
+            bare && cfg.description.connectable.includes(phrase)
+              ? skipJoinedWarnings(words, cfg.description)
+              : words;
+          return rules.some((candidate) => isNegated(after, candidate, cancellers));
         });
         const charge = !negated && !charged.has(phrase);
         if (charge) charged.add(phrase);

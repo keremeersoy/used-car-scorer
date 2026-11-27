@@ -7,17 +7,21 @@ import { chromeTabApi, readTab, type ReadOutcome } from '../../read/readTab';
 import { requestKey, takeReadRequest } from '../../read/request';
 import { config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
+import { ConflictError } from '../../storage/listings';
+import type { Listing } from '../../types';
 import { noticeText, strings } from '../strings';
 import { useListings } from '../useListings';
 import { Backup } from './Backup';
 import { ListingForm } from './ListingForm';
 import {
-  afterSave, discardAndReplace, initialState, keepCurrent, receive, savedWhileEditing,
-  wouldOverwrite, type ReadResult,
+  afterSave, discardAndReplace, expectedEntry, initialState, keepCurrent, receive,
+  savedWhileEditing, type ReadResult,
 } from './panelState';
 import { ReplacePrompt } from './ReplacePrompt';
 import { SavedList } from './SavedList';
 import { ScoreCard } from './ScoreCard';
+
+type Conflict = { replacing: Listing | null };
 
 const partLabel = (key: string) =>
   config.damage.parts.find((part) => part.key === key)?.label ?? key;
@@ -37,7 +41,8 @@ export function App() {
   const [state, setState] = useState(initialState);
   const [tab, setTab] = useState<'listing' | 'saved'>('listing');
   const [formValid, setFormValid] = useState(true);
-  const [confirmingOverwrite, setConfirmingOverwrite] = useState(false);
+  // Set when saving would replace something this draft did not start from.
+  const [conflict, setConflict] = useState<Conflict | null>(null);
   const [savedRevision, setSavedRevision] = useState<number | null>(null);
   const { listings, error, load, save, remove, restore } = useListings();
   const begin = useRef(createSequence()).current;
@@ -80,33 +85,39 @@ export function App() {
   };
 
   const { draft } = state;
-  useEffect(() => setConfirmingOverwrite(false), [state.revision, draft?.listing.id]);
+  useEffect(() => setConflict(null), [state.revision, draft?.listing.id]);
 
   const canSave = draft !== null && draft.listing.id !== '' && formValid;
 
-  const saveDraft = async (confirmed = false) => {
-    if (!draft || !canSave) return;
-    const before = await load();
-    if (!before) return; // without the saved data an overwrite could not be noticed
-    if (!confirmed && wouldOverwrite(draft, before)) {
-      setConfirmingOverwrite(true);
-      return;
-    }
-    setConfirmingOverwrite(false);
-    const entry = toListing(draft, new Date());
+  const saving = useRef(false);
+
+  const saveDraft = async (confirmed?: Conflict) => {
+    if (!draft || !canSave || saving.current) return;
+    saving.current = true;
     try {
-      await save(entry);
-    } catch {
-      return; // the error is shown and the draft stays unsaved
+      setConflict(null);
+      const entry = toListing(draft, new Date());
+      const id = entry.id.trim();
+      try {
+        await save(entry, confirmed ?? { replacing: expectedEntry(draft) });
+      } catch (cause) {
+        // Any other error is already shown and the draft stays unsaved.
+        if (!(cause instanceof ConflictError)) return;
+        const current = await load();
+        if (current) setConflict({ replacing: current.find((l) => l.id === id) ?? null });
+        return;
+      }
+      const saved = (await load()) ?? [];
+      const { revision } = state;
+      setState((current) => {
+        if (current.draft === draft) return afterSave(current, saved);
+        if (current.revision !== revision) return current; // another listing is shown now
+        return savedWhileEditing(current, saved, id);
+      });
+      setSavedRevision(revision);
+    } finally {
+      saving.current = false;
     }
-    const saved = (await load()) ?? [];
-    const { revision } = state;
-    setState((current) => {
-      if (current.draft === draft) return afterSave(current, saved);
-      if (current.revision !== revision) return current; // another listing is shown now
-      return savedWhileEditing(current, saved, entry.id.trim());
-    });
-    setSavedRevision(revision);
   };
 
   const change = (apply: (current: Draft) => Draft) =>
@@ -176,13 +187,13 @@ export function App() {
               onValidity={setFormValid}
             />
             <div className="footer">
-              {confirmingOverwrite ? (
+              {conflict ? (
                 <div className="actions">
                   <span>{strings.overwrite}</span>
-                  <button type="button" className="danger" data-action="overwrite" onClick={() => void saveDraft(true)}>
+                  <button type="button" className="danger" data-action="overwrite" onClick={() => void saveDraft(conflict)}>
                     {strings.overwriteConfirm}
                   </button>
-                  <button type="button" onClick={() => setConfirmingOverwrite(false)}>
+                  <button type="button" onClick={() => setConflict(null)}>
                     {strings.cancel}
                   </button>
                 </div>
@@ -219,7 +230,8 @@ export function App() {
           }}
           onRemove={(id) => void remove(id).catch(() => undefined)}
         />
-        <Backup listings={listings} onRestore={restore} />
+        {/* After a read error the list may be stale, so it is not offered for backup. */}
+        <Backup listings={error ? [] : listings} onRestore={restore} />
       </div>
     </main>
   );

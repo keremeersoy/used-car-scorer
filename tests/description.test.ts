@@ -76,6 +76,20 @@ test.each<[string, number]>([
   ['Şase, podye, airbag sorunsuz', 10],
   ['Airbag, motor arızalı', 4],
   ['Airbag, boya yok', 7],
+  // A shared negation never hides a fact stated about the first warning.
+  ['Motor arızalı ve ağır hasar kaydı yoktur', 7],
+  ['Ağır hasarlı ve acil değil', 7],
+  ['Motor arızalı ve acil değil, pazarlık payı var', 7],
+  ['Pertli ve acil değil', 7],
+  ['Airbagli ve pert değil', 7],
+  ['Araç ağır hasarlı ve pert değildir', 7],
+  ['Ağır hasar kaydı ve motor arızalı değil', 7],
+  // A negator that is itself denied or questioned clears nothing.
+  ['Şasi hatasız değil', 7],
+  ['Pert yok değil', 7],
+  ['airbag ve sasi hatasiz degil', 4],
+  ['Tavan, şasi, airbag hatasız değil', 4],
+  ['Ağır hasar veya pert kaydı yok mu? Var', 4],
 ])('%s → %i', (text, points) => expect(run(text).points).toBe(points));
 
 test('every match shows its sentence, negated ones uncounted', () => {

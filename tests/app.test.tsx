@@ -173,3 +173,35 @@ test('a backup file is restored from the saved tab, and a wrong file is explaine
   expect(fake.stored()['9']!.title).toBe('Yedekten gelen');
   expect(text()).toContain('1 eklendi');
 });
+
+test('a change made in another window is not overwritten without asking', async () => {
+  const fake = fakeChrome([listing({ id: '2', km: 100 })]);
+  await start(fake);
+  await openSaved();
+  fake.stored()['2']!.km = 200; // another window saves, keeping the same date
+  await type('referencePrice', '5');
+  await click('[data-action="save"]');
+  expect(text()).toContain('Üzerine yazılsın mı?');
+  expect(fake.stored()['2']!.km).toBe(200);
+  await click('[data-action="overwrite"]');
+  expect(fake.stored()['2']).toMatchObject({ km: 100, referencePrice: 5 });
+});
+
+test('a second click during a save does nothing', async () => {
+  const fake = fakeChrome([]);
+  await start(fake);
+  await click('[data-action="reread"]');
+  await type('km', '1');
+  let writes = 0;
+  const slow = gate();
+  fake.hooks.beforeSet = async () => {
+    writes++;
+    await slow.closed;
+  };
+  await click('[data-action="save"]');
+  await click('[data-action="save"]');
+  slow.open();
+  await settle();
+  expect(writes).toBe(1);
+  expect(text()).not.toContain('Üzerine yazılsın mı?');
+});

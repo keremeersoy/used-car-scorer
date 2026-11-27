@@ -7,6 +7,8 @@ export type EditKey = FieldKey | `parts.${string}`;
 export interface Draft {
   listing: Omit<Listing, 'savedAt'>;
   savedAt: string | null;
+  /** The saved entry this draft started from; saving may replace only that one. */
+  base: Listing | null;
   fromPage: boolean;
   /** What the page states where the draft keeps something else. */
   pageValues: Partial<Record<EditKey, unknown>>;
@@ -42,12 +44,20 @@ const blank = (url: string): Draft['listing'] => ({
 });
 
 export function emptyDraft(url: string): Draft {
-  return { listing: blank(url), savedAt: null, fromPage: false, pageValues: {}, dirty: false };
+  const listing = blank(url);
+  return { listing, savedAt: null, base: null, fromPage: false, pageValues: {}, dirty: false };
 }
 
 export function draftFromSaved(saved: Listing): Draft {
   const { savedAt, ...listing } = saved;
-  return { listing: structuredClone(listing), savedAt, fromPage: false, pageValues: {}, dirty: false };
+  return {
+    listing: structuredClone(listing),
+    savedAt,
+    base: saved,
+    fromPage: false,
+    pageValues: {},
+    dirty: false,
+  };
 }
 
 /** Typed values win over the page; otherwise a stated page value wins over the saved one. */
@@ -86,7 +96,14 @@ export function draftFromPage(page: PageRead, saved: Listing | undefined): Draft
     listing.parts[part] = status ?? 'unknown';
   }
 
-  return { listing, savedAt: saved?.savedAt ?? null, fromPage: true, pageValues, dirty: false };
+  return {
+    listing,
+    savedAt: saved?.savedAt ?? null,
+    base: saved ?? null,
+    fromPage: true,
+    pageValues,
+    dirty: false,
+  };
 }
 
 const markEdited = (fields: string[], key: EditKey) =>

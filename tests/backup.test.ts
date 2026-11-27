@@ -20,6 +20,9 @@ test.each([
   ['a negative km', file({ km: -1 })],
   ['an unknown part status', file({ parts: { roof: 'fine' } })],
   ['a broken date', file({ savedAt: 'yesterday' })],
+  ['a date that is not ISO', file({ savedAt: '1' })],
+  ['a date in the future', file({ savedAt: '9999-01-02T00:00:00Z' })],
+  ['an impossible year', file({ year: 2108 })],
   ['a missing field', file({ editedFields: undefined })],
 ])('rejects %s', (_, text) => {
   expect(() => parseBackup(text)).toThrow(BackupError);
@@ -45,4 +48,18 @@ test('restoring never replaces a newer saved entry', async () => {
   expect(result).toEqual({ added: 1, updated: 1, skipped: 1 });
   const km = Object.fromEntries((await store.getAll()).map((l) => [l.id, l.km]));
   expect(km).toEqual({ kept: 1, old: 2, new: 2 });
+});
+
+test('the same listing twice in a file is counted once, newest first', async () => {
+  const data: Record<string, unknown> = {};
+  const store = createListingStore({
+    get: async (key) => (key in data ? { [key]: structuredClone(data[key]) } : {}),
+    set: async (items) => void Object.assign(data, structuredClone(items)),
+  });
+  const result = await store.restore([
+    listing({ id: '9', km: 1, savedAt: '2026-11-01T00:00:00Z' }),
+    listing({ id: '9 ', km: 2, savedAt: '2026-11-02T00:00:00Z' }),
+  ]);
+  expect(result).toEqual({ added: 1, updated: 0, skipped: 1 });
+  expect((await store.getAll()).map((l) => l.km)).toEqual([2]);
 });

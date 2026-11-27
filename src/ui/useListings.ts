@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  createListingStore, STORE_KEY, StorageDataError, type RestoreResult,
+  ConflictError, createListingStore, STORE_KEY, StorageDataError, type RestoreResult,
 } from '../storage/listings';
 import type { Listing } from '../types';
 import { strings } from './strings';
@@ -55,7 +55,8 @@ export function useListings() {
       try {
         await operation();
       } catch (cause) {
-        setError(describe(cause, strings.storageFailed));
+        // A conflict is a question for the owner, not a failure.
+        if (!(cause instanceof ConflictError)) setError(describe(cause, strings.storageFailed));
         throw cause;
       }
       await reload();
@@ -63,7 +64,11 @@ export function useListings() {
     [reload],
   );
 
-  const save = useCallback((listing: Listing) => write(() => store.save(listing)), [write]);
+  const save = useCallback(
+    (listing: Listing, expected: { replacing: Listing | null }) =>
+      write(() => store.save(listing, expected)),
+    [write],
+  );
   const remove = useCallback((id: string) => write(() => store.remove(id)), [write]);
 
   const restore = useCallback(
