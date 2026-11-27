@@ -64,7 +64,8 @@ export function createListingStore(area: StorageArea) {
     },
     async save(listing: Listing): Promise<void> {
       const id = listing.id.trim();
-      if (id === '') throw new Error('A listing number is required to save');
+      // '__proto__' as a key would replace the object's prototype instead of adding an entry.
+      if (id === '' || id === '__proto__') throw new Error('A listing number is required to save');
       await change((listings) => {
         listings[id] = { ...listing, id };
       });

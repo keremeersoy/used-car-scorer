@@ -9,3 +9,11 @@ test('manifest asks for exactly the agreed access', () => {
     expect(manifest).not.toHaveProperty(key);
   }
 });
+
+test('extension pages cannot send data anywhere or load remote code', () => {
+  const policy = manifest.content_security_policy.extension_pages;
+  for (const rule of ["default-src 'self'", "script-src 'self'", "connect-src 'none'",
+    "object-src 'none'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"]) {
+    expect(policy.split('; ')).toContain(rule);
+  }
+});

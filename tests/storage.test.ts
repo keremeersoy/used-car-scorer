@@ -31,8 +31,8 @@ test('concurrent saves keep both', async () => {
   expect(await store.getAll()).toHaveLength(2);
 });
 
-test('a blank id is rejected', async () => {
-  await expect(createListingStore(fakeArea()).save(listing({ id: '  ' }))).rejects.toThrow();
+test.each(['  ', '__proto__'])('the id %j is rejected', async (id) => {
+  await expect(createListingStore(fakeArea()).save(listing({ id }))).rejects.toThrow();
 });
 
 test.each([

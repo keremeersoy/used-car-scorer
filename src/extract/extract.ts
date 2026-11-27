@@ -7,7 +7,8 @@ import { description } from './description';
 import { unrecognised, type ExtractResult } from './types';
 
 /** Our part key for each class name in the page's paint diagram. */
-const PART_CLASSES: Record<string, string> = {
+// Maps, because class names come from the page and must not reach object internals.
+const PART_CLASSES = new Map(Object.entries({
   roof: 'roof',
   'front-hood': 'hood',
   'rear-hood': 'trunk',
@@ -21,15 +22,15 @@ const PART_CLASSES: Record<string, string> = {
   'front-right-door': 'rightFrontDoor',
   'rear-left-door': 'leftRearDoor',
   'rear-right-door': 'rightRearDoor',
-};
+}));
 
 /** A part counts as anything, original included, only when the diagram says so. */
-const STATUS_CLASSES: Record<string, PartStatus> = {
+const STATUS_CLASSES = new Map<string, PartStatus>(Object.entries({
   'original-new': 'original',
   'local-painted-new': 'localPaint',
   'painted-new': 'painted',
   'changed-new': 'replaced',
-};
+} satisfies Record<string, PartStatus>));
 
 const clean = (text: string | null | undefined) => text?.replace(/\s+/g, ' ').trim() || null;
 
@@ -70,8 +71,8 @@ function parts(doc: Document): Record<string, PartStatus> {
   const result = allUnknown();
   for (const element of doc.querySelectorAll('.car-parts > div')) {
     const classes = [...element.classList];
-    const part = classes.map((name) => PART_CLASSES[name]).find(Boolean);
-    const status = classes.map((name) => STATUS_CLASSES[name]).find(Boolean);
+    const part = classes.map((name) => PART_CLASSES.get(name)).find(Boolean);
+    const status = classes.map((name) => STATUS_CLASSES.get(name)).find(Boolean);
     if (part && status) result[part] = status;
   }
   return result;
@@ -79,7 +80,8 @@ function parts(doc: Document): Record<string, PartStatus> {
 
 export function extract(doc: Document, url: string): ExtractResult {
   const info = details(doc);
-  const id = clean(doc.querySelector('#classifiedId')?.textContent);
+  const stated = clean(doc.querySelector('#classifiedId')?.textContent);
+  const id = stated && /^\d+$/.test(stated) ? stated : null;
   const cost = price(doc);
   const year = number(parseYear(info.get('Yıl') ?? ''));
   const km = number(parseWholeNumber(info.get('KM') ?? ''));

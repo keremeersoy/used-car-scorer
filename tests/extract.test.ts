@@ -91,3 +91,21 @@ test('a bot check or unrelated page yields nothing, never clean values', () => {
   expect(Object.values(fields).every((value) => value === null)).toBe(true);
   expect(Object.values(parts).every((status) => status === 'unknown')).toBe(true);
 });
+
+// The page is untrusted input: its text and class names must not reach object internals.
+const minimal = (id: string, partClasses: string) =>
+  parse(`<div class="classifiedInfo"><h3 class="classifiedPriceValue">1.000 TL</h3>
+    <dl><dd id="classifiedId">${id}</dd></dl></div>
+    <div class="car-parts"><div class="${partClasses}"></div></div>`);
+
+test.each(['__proto__', 'constructor', '12a', ''])('listing number %j is not accepted', (id) => {
+  expect(extract(minimal(id, 'roof original-new'), 'u').recognised).toBe(false);
+});
+
+test.each(['constructor original-new', 'roof constructor', '__proto__ toString'])(
+  'diagram classes "%s" add nothing', (classes) => {
+    const { recognised, read } = extract(minimal('123', classes), 'u');
+    expect(recognised).toBe(true);
+    expect(Object.keys(read.parts)).toEqual(config.damage.parts.map((part) => part.key));
+    expect(new Set(Object.values(read.parts))).toEqual(new Set(['unknown']));
+  });

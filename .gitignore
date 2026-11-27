@@ -3,3 +3,12 @@ dist/
 fixtures/
 .superpowers/
 .DS_Store
+# Saved listing pages dropped outside fixtures/, secrets and packaged builds
+*sahibinden*.html
+*.mhtml
+*.expected.json
+.env*
+*.pem
+*.key
+*.crx
+*.zip
