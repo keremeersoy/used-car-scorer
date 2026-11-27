@@ -1,4 +1,6 @@
 import { createHash, createPublicKey } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import manifest from '../public/manifest.json';
 
 test('manifest asks for exactly the agreed access', () => {
@@ -45,4 +47,13 @@ test('a fixed public key keeps the extension id, and the saved listings, across 
 // Granted only if the owner turns automatic reading on, and for this one site only.
 test('the only optional access is sahibinden.com over https', () => {
   expect(manifest.optional_host_permissions).toEqual(['https://*.sahibinden.com/*']);
+});
+
+test.each(['16', '32', '48', '128'])('the %s px icon exists and has that size', (size) => {
+  const path = manifest.icons[size as keyof typeof manifest.icons];
+  expect(manifest.action.default_icon[size as keyof typeof manifest.icons]).toBe(path);
+  const png = readFileSync(join(__dirname, '../public', path));
+  expect(png.subarray(1, 4).toString()).toBe('PNG');
+  // Width and height sit at fixed positions in the PNG header.
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([Number(size), Number(size)]);
 });

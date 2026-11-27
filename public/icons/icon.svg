@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Araç Skoru</title>
+  <!-- A car from above with one painted panel, the thing the extension looks for. -->
+  <rect width="128" height="128" rx="28" fill="#1c4f9c"/>
+  <g fill="#0d2347">
+    <rect x="23" y="28" width="14" height="28" rx="6"/>
+    <rect x="91" y="28" width="14" height="28" rx="6"/>
+    <rect x="23" y="76" width="14" height="28" rx="6"/>
+    <rect x="91" y="76" width="14" height="28" rx="6"/>
+  </g>
+  <clipPath id="body"><rect x="32" y="12" width="64" height="104" rx="24"/></clipPath>
+  <g clip-path="url(#body)">
+    <rect x="32" y="12" width="64" height="104" fill="#ffffff"/>
+    <rect x="68" y="12" width="28" height="36" fill="#ee8b34"/>
+    <path d="M40 48h48l-7 16H47z" fill="#7fa3d6"/>
+    <path d="M47 88h34l5 12H42z" fill="#7fa3d6"/>
+  </g>
+</svg>
