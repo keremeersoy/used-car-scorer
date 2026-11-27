@@ -15,6 +15,14 @@ test.each<[string, number]>([
   ['ACIL SATILIK', 7],
   ['PERT KAYDI YOKTUR', 10],
   ['Yok böyle araba. Pert.', 7],
+  // Spellings and wording sellers use.
+  ['AIRBAGLER-HATASIZDIR', 10],
+  ['Airbagler hatasız', 10],
+  ['Airbag sorunsuz', 10],
+  ['Airbagler sorunsuzdur', 10],
+  ['Tavan egirbek tamir edildi', 7],
+  ['Airbek patladı', 7],
+  ['Acil satılık, sorunsuz araç', 7],
 ])('%s → %i', (text, points) => expect(run(text).points).toBe(points));
 
 test('every match shows its sentence, negated ones uncounted', () => {

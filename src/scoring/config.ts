@@ -93,7 +93,11 @@ export const config: Config = {
   },
   description: {
     penalty: 3,
-    phrases: ['ağır hasar', 'pert', 'airbag', 'şasi', 'motor arızalı', 'acil'],
-    negators: ['yok', 'yoktur', 'değil', 'değildir', 'bulunmamaktadır', 'bulunmuyor'],
+    // 'egirbek' and 'airbek' are how some sellers spell airbag.
+    phrases: ['ağır hasar', 'pert', 'airbag', 'egirbek', 'airbek', 'şasi', 'motor arızalı', 'acil'],
+    negators: [
+      'yok', 'yoktur', 'değil', 'değildir', 'bulunmamaktadır', 'bulunmuyor',
+      'hatasız', 'hatasızdır', 'sorunsuz', 'sorunsuzdur',
+    ],
   },
 };

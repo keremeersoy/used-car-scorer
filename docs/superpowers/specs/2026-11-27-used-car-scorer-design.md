@@ -178,9 +178,9 @@ The panel shows which reference was used, and for a median how many listings it 
 ### 7.4 Description (10)
 
 - Start at 10, subtract 3 for each **distinct** phrase with at least one non-negated match, floor 0 **(call: distinct, not every occurrence)**.
-- Default phrases: "ağır hasar", "pert", "airbag", "şasi", "motor arızalı", "acil".
+- Default phrases: "ağır hasar", "pert", "airbag", "egirbek", "airbek", "şasi", "motor arızalı", "acil". ("egirbek" and "airbek" added by the owner after the first real pages.)
 - Matching is Turkish-locale lowercase and must start at a word boundary that understands Turkish letters. Suffixes are allowed. Without this, "pert" would match inside "ekspertiz".
-- Negation: a match is negated when a negator ("yok", "yoktur", "değil", "değildir", "bulunmamaktadır", "bulunmuyor") follows it in the same clause. Clauses end at `. ! ? ; ,` or a line break. The negator list is in the config. Unclear cases count against the listing.
+- Negation: a match is negated when a negator ("yok", "yoktur", "değil", "değildir", "bulunmamaktadır", "bulunmuyor", and, added by the owner, "hatasız", "hatasızdır", "sorunsuz", "sorunsuzdur") follows it in the same clause. Clauses end at `. ! ? ; ,` or a line break. The negator list is in the config. Unclear cases count against the listing.
 - Every match shows its sentence, negated ones too, marked as not counted.
 - Description blank or not read: leave the section out and warn.
 
