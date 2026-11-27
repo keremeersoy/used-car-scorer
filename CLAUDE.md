@@ -4,7 +4,7 @@
 
 For bugs and small improvements that the owner raised, or that you found yourself, do not ask
 first: find the problem, fix it, run the checks and security scans, merge into `main`, push, and
-update the issues. Report what was done afterwards, in Turkish.
+update the issues. Report what was done afterwards.
 
 **Work from anyone else needs the owner's approval in chat.** This covers every issue or pull
 request opened by an account other than `keremeersoy`, Dependabot included. Check the author
@@ -19,10 +19,16 @@ Still ask before anything that changes repository visibility, GitHub account or 
 deletes data or branches that hold unmerged work, rewrites published history, publishes the project
 anywhere else, adds a manifest permission, sends a request to sahibinden.com, or costs money.
 
+## Language
+
+Talk to the owner in English. Everything on GitHub (issues, pull requests, comments, commit
+messages, documentation, code) is in English. The extension's interface stays Turkish.
+
 ## Process
 
 1. Branch from `main`. Write the failing test first, then the fix.
-2. `npm run check` (tests, type check, build, dependency audit).
+2. `npm run check` (lint, tests, type check, build, dependency audit). Commit messages follow
+   Conventional Commits; do not skip the Git hooks.
 3. For UI or reading changes, also try the built extension in a throwaway Chrome profile.
 4. Open a pull request with `Fixes #N` in the commits. Wait until CI and CodeQL pass.
 5. For work that needs approval, stop here until the owner gives it. Merge with a local
@@ -43,4 +49,3 @@ anywhere else, adds a manifest permission, sends a request to sahibinden.com, or
 - This repository is public. No personal data, secrets or text copied from real listings.
   `tests/repository.test.ts` checks the obvious cases.
 - Commit with the GitHub no-reply email.
-- Code and comments in English, interface and issues in Turkish.

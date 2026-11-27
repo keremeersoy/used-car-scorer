@@ -1,104 +1,113 @@
-# Araç Skoru
+# Used Car Scorer
 
-sahibinden.com'daki ikinci el araç ilanlarını karşılaştırmak için kişisel bir Chrome eklentisi.
-İlan sayfasındayken eklenti simgesine tıklarsın; yan panel ilanı okur, 100 üzerinden bir puan ve
-nedenlerini gösterir. İlanları kaydedip yan yana karşılaştırabilirsin.
+[![CI](https://github.com/keremeersoy/used-car-scorer/actions/workflows/ci.yml/badge.svg)](https://github.com/keremeersoy/used-car-scorer/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/keremeersoy/used-car-scorer/actions/workflows/codeql.yml/badge.svg)](https://github.com/keremeersoy/used-car-scorer/actions/workflows/codeql.yml)
 
-> **Kullanım koşulları riski:** Site, eklentileri fark edebilir veya koşullarına aykırı sayıp hesabı
-> kısıtlayabilir. Kullanmadan önce koşulları oku. Bu proje sahibinden.com ile bağlantılı değildir.
+A personal Chrome extension for comparing used car listings on sahibinden.com. Open a listing,
+click the extension icon, and a side panel reads it and shows a score out of 100 with the reasons.
+Save listings and compare them side by side. The interface is in Turkish.
+
+> **Terms of service risk:** the site may detect extensions or consider them against its terms and
+> restrict your account. Read the terms before using this. This project is not affiliated with
+> sahibinden.com.
 
 <p>
-  <img src="docs/images/panel.png" alt="Yan panelde puan ve alanlar (uydurma veriler)" width="320">
+  <img src="docs/images/panel.png" alt="Side panel with the score and the fields (made-up data)" width="320">
 </p>
 
-![Karşılaştırma ekranı (uydurma veriler)](docs/images/compare.png)
+![Compare view (made-up data)](docs/images/compare.png)
 
-## Özellikler
+## Features
 
-- Açık ilanı tek tıkla okur; her alan elle düzeltilebilir.
-- Puan anında güncellenir, her bölümün nedeni görünür.
-- Eksik bilgi hiçbir zaman "temiz" sayılmaz.
-- Kayıtlı ilanları karşılaştırır, siler, dosyaya yedekler ve geri yükler.
-- Tüm veriler tarayıcıda kalır; sunucu ve analitik yoktur.
+- Reads the open listing in one click; every field can be corrected by hand.
+- The score updates as you type, and every section explains itself.
+- A missing value is never treated as clean.
+- Compare, delete, back up and restore saved listings.
+- All data stays in the browser. No server, no analytics.
 
-## Neyi yapmaz
+## What it does not do
 
-Siteyi taramaz, kendi kendine sayfa açmaz, ilan numarasıyla veri çekmez, bot korumasını aşmaz ve
-sayfaya hiçbir şey eklemez. Yalnızca zaten açık olan sayfayı, yalnızca sen tıklayınca okur.
+It does not crawl, open pages on its own, fetch by listing number, get around bot protection or add
+anything to the page. It reads only the page that is already open, only when you click.
 
-İzinler: `activeTab`, `scripting`, `storage`, `sidePanel`. Site izni istemez.
+Permissions: `activeTab`, `scripting`, `storage`, `sidePanel`. No site access is requested, and the
+content security policy blocks all network requests from the extension.
 
-## Kurulum
+## Install
 
-Node 24 (bkz. `.nvmrc`) ve Chrome 116 veya üzeri gerekir.
+Requires Node 24 (see `.nvmrc`) and Chrome 116 or later.
 
 ```bash
 npm ci
 npm run build
 ```
 
-Chrome'da `chrome://extensions` sayfasını aç, **Geliştirici modu**'nu etkinleştir, **Paketlenmemiş
-öğe yükle** ile `dist/` klasörünü seç. Yeni derlemeden sonra eklentiyi yenile.
+Open `chrome://extensions`, turn on **Developer mode**, choose **Load unpacked** and select `dist/`.
+Reload the extension after each build.
 
-Eklentinin kimliği sabittir (`lnlcddeibdpccfdocfclbpclhacleoph`, manifestteki açık anahtardan gelir), yani klasörü taşımak
-kayıtları etkilemez. Eklentiyi kaldırırsan kayıtlar yine silinir; önce **Kayıtlılar** sekmesinden
-**Yedek al** ile dosyaya kaydet, sonra **Yedekten yükle** ile geri al.
+The extension id is fixed (`lnlcddeibdpccfdocfclbpclhacleoph`, derived from the public key in the
+manifest), so moving the folder keeps your saved listings. Removing the extension deletes them:
+back them up first with **Yedek al** on the **Kayıtlılar** tab and restore with **Yedekten yükle**.
 
-**Sabit kimlikten önceki bir sürümden geçiyorsan:** yeni sürümü derlemeden ve eklentiyi yenilemeden
-önce **Yedek al**. Kimlik değiştiği için eski kayıtlar görünmez ve Chrome onları silebilir. Yeni
-sürümde **Yedekten yükle** ile geri getir.
+**Upgrading from a version without the fixed id:** before building the new version and reloading,
+click **Yedek al**. The id changes once, so old data is no longer visible and Chrome may delete it.
+Restore the file in the new version.
 
-## Kullanım
+## Use
 
-1. Bir ilanın detay sayfasında eklenti simgesine tıkla.
-2. Gerekirse alanları düzelt (örneğin sayfada ayrı bir alanı olmayan tramer tutarı).
-3. **Kaydet**'e bas.
-4. **Kayıtlılar** sekmesinde en az iki ilan seçip **Karşılaştır**'a bas.
+1. On a listing's detail page, click the extension icon.
+2. Correct fields if needed, for example the damage record amount, which the page has no field for.
+3. Click **Kaydet** (save).
+4. On the **Kayıtlılar** (saved) tab, select two or more listings and click **Karşılaştır** (compare).
 
-Aynı sekmede başka bir ilana geçtiysen **Tekrar oku** yeterli; yeni sekmede simgeye yeniden tıkla.
+**Tekrar oku** (read again) reads another listing opened in the same tab. A new tab needs the icon
+again.
 
-## Puanlama
+## Scoring
 
-| Bölüm    | Ağırlık | Özet                                                                      |
-| -------- | ------- | ------------------------------------------------------------------------- |
-| Hasar    | 35      | Boyalı ve değişen parçalar, tramer, ağır hasar kaydı                      |
-| Fiyat    | 30      | Elle girilen referans, yoksa benzer en az 5 kayıtlı ilanın ortanca fiyatı |
-| Km       | 25      | Yıllık ortalama kilometre                                                 |
-| Açıklama | 10      | Uyarı ifadeleri                                                           |
+| Section | Weight | Based on |
+|---|---|---|
+| Damage | 35 | Painted and replaced parts, damage record amount, heavy damage record |
+| Price | 30 | A reference price you enter, otherwise the median of at least 5 similar saved listings |
+| Km | 25 | Average kilometres per year |
+| Description | 10 | Warning phrases, with Turkish negation handling |
 
-Referans yoksa fiyat bölümü dışarıda bırakılır ve puan 100'e oranlanır. Fiyatlar satış fiyatı değil,
-ilanda istenen fiyatlardır. Tüm sayılar ve kelime listeleri
-[`src/scoring/config.ts`](src/scoring/config.ts) dosyasındadır. Ayrıntılar:
-[tasarım dokümanı](docs/superpowers/specs/2026-11-27-used-car-scorer-design.md).
+Without a reference, price is left out and the rest is rescaled to 100. Prices are asking prices,
+not sale prices. All numbers and word lists are in
+[`src/scoring/config.ts`](src/scoring/config.ts). Details are in the
+[design document](docs/superpowers/specs/2026-11-27-used-car-scorer-design.md).
 
-## Geliştirme
+## Development
 
 ```bash
-npm run check
+npm run check     # lint, tests, type check, build and dependency audit
+npm run format    # apply Biome formatting and safe fixes
 ```
 
-Testleri, tip kontrolünü, derlemeyi ve bağımlılık taramasını birlikte çalıştırır. GitHub'da her
-gönderimde bunlar ve CodeQL güvenlik analizi çalışır; Dependabot haftalık güncelleme önerir.
+Git hooks (Husky) lint staged files, check commit messages against
+[Conventional Commits](https://www.conventionalcommits.org/) and run lint, type check and tests
+before a push. On GitHub, CI and CodeQL run on every pull request, and Dependabot proposes updates
+weekly.
 
-| Klasör                     | İçerik                                                                      |
-| -------------------------- | --------------------------------------------------------------------------- |
-| `src/extract`              | İlan sayfasını okuma                                                        |
-| `src/scoring`              | Puanlama ve ayarları                                                        |
-| `src/draft`, `src/storage` | Düzenleme ve kayıt                                                          |
-| `src/read`                 | Tıklamadan sayfa kopyasına giden akış                                       |
-| `src/ui`                   | Yan panel ve karşılaştırma ekranı (tüm Türkçe metinler `strings.ts` içinde) |
+| Folder | Contents |
+|---|---|
+| `src/extract` | Reading a listing page |
+| `src/scoring` | Scoring and its configuration |
+| `src/draft`, `src/storage` | Editing, saving and backups |
+| `src/read` | From the click to a copy of the page |
+| `src/ui` | Side panel and compare view (all Turkish copy is in `strings.ts`) |
 
-Kod ve yorumlar İngilizce, arayüz Türkçedir.
+### Reader tests
 
-### İlan okuyucusunun testleri
+Selectors come from listing pages saved by hand into `fixtures/`, which is **never committed**, each
+with a `<name>.expected.json` beside it. When the folder is empty, as in CI, the page tests are
+skipped and the reader counts as unverified.
 
-Seçiciler, elle kaydedilen ilan sayfalarından alınır. Bu sayfalar `fixtures/` klasörüne konur ve
-depoya **eklenmez**; her birinin yanında bir `<ad>.expected.json` bulunur. Klasör boşsa sayfa testleri
-uyarıyla atlanır ve okuyucu doğrulanmamış sayılır (CI'da durum budur).
+Remove seller names, phone numbers and your own account details from saved pages. When the site
+changes, save a new page, write its expected values and fix `src/extract/`. Never fetch pages from
+the site automatically.
 
-Sayfalardan satıcı adlarını, telefonları ve kendi hesap bilgilerini temizle. Site değişirse yeni bir
-sayfa kaydet, beklenen değerleri yaz ve `src/extract/` altını düzelt. Siteden otomatik sayfa çekme.
+## Status
 
-## Durum
-
-Çalışan ilk sürüm. Bilinen sorunlar Issues sekmesinde takip edilir.
+A working first version. Known issues are tracked in
+[Issues](https://github.com/keremeersoy/used-car-scorer/issues).
