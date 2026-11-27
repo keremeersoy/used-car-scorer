@@ -12,3 +12,14 @@ export function parseWholeNumber(text: string): ParsedNumber {
   if (!WHOLE_NUMBER.test(digits)) return { ok: false };
   return { ok: true, value: Number(digits.replace(/[.\s]/g, '')) };
 }
+
+export function parsePrice(text: string): ParsedNumber {
+  const parsed = parseWholeNumber(text);
+  return parsed.ok && parsed.value === 0 ? { ok: true, value: null } : parsed;
+}
+
+export function parseYear(text: string): ParsedNumber {
+  const trimmed = text.trim();
+  if (trimmed === '') return { ok: true, value: null };
+  return /^\d{4}$/.test(trimmed) ? { ok: true, value: Number(trimmed) } : { ok: false };
+}

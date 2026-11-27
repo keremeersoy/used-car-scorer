@@ -52,7 +52,23 @@ export const config: Config = {
     unknownRecord: 5,
     unknownHeavy: 5,
     incompleteCap: 15,
-    parts: [], // filled from the saved listing pages (plan Task 9)
+    // PROVISIONAL: the usual body panels, so the form can be filled by hand.
+    // Plan Task 9 checks keys and labels against the saved listing pages.
+    parts: [
+      { key: 'roof', label: 'Tavan' },
+      { key: 'hood', label: 'Motor kaputu' },
+      { key: 'trunk', label: 'Bagaj kapağı' },
+      { key: 'frontBumper', label: 'Ön tampon' },
+      { key: 'rearBumper', label: 'Arka tampon' },
+      { key: 'leftFrontFender', label: 'Sol ön çamurluk' },
+      { key: 'rightFrontFender', label: 'Sağ ön çamurluk' },
+      { key: 'leftRearFender', label: 'Sol arka çamurluk' },
+      { key: 'rightRearFender', label: 'Sağ arka çamurluk' },
+      { key: 'leftFrontDoor', label: 'Sol ön kapı' },
+      { key: 'rightFrontDoor', label: 'Sağ ön kapı' },
+      { key: 'leftRearDoor', label: 'Sol arka kapı' },
+      { key: 'rightRearDoor', label: 'Sağ arka kapı' },
+    ],
     roofPart: 'roof',
   },
   price: {
