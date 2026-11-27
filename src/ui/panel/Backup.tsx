@@ -21,7 +21,8 @@ function download(listings: Listing[]) {
 }
 
 export function Backup({
-  listings, onRestore,
+  listings,
+  onRestore,
 }: {
   listings: Listing[];
   onRestore: (entries: Listing[]) => Promise<RestoreResult>;
@@ -39,7 +40,9 @@ export function Backup({
     try {
       const { added, updated, skipped } = await onRestore(backup.listings);
       setMessage(
-        [restoreSummary(added, updated, skipped), rejectedSummary(backup.rejected)].join(' ').trim(),
+        [restoreSummary(added, updated, skipped), rejectedSummary(backup.rejected)]
+          .join(' ')
+          .trim(),
       );
     } catch {
       setMessage(null); // the storage error is already shown
@@ -71,7 +74,11 @@ export function Backup({
           />
         </label>
       </div>
-      {message && <p className="banner" role="status">{message}</p>}
+      {message && (
+        <p className="banner" role="status">
+          {message}
+        </p>
+      )}
     </section>
   );
 }

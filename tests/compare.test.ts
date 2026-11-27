@@ -15,8 +15,11 @@ const saved = [
 test('columns follow the ids, skip deleted ones, mark the best and the left-out sections', () => {
   const { columns, rows, missing } = buildComparison(['b', 'gone', 'a', 'c'], saved, NOW, testCfg);
   expect(missing).toEqual(['gone']);
-  expect(columns.map((c) => [c.id, c.isBest]))
-    .toEqual([['b', false], ['a', true], ['c', false]]);
+  expect(columns.map((c) => [c.id, c.isBest])).toEqual([
+    ['b', false],
+    ['a', true],
+    ['c', false],
+  ]);
   expect(columns[0]!.excluded).toEqual(['price']);
   expect(columns[2]!.total).toBeNull();
   expect(rows.every((row) => row.cells.length === 3)).toBe(true);
@@ -24,8 +27,10 @@ test('columns follow the ids, skip deleted ones, mark the best and the left-out 
 
 test('ties are all best', () => {
   const two = [listing({ id: 'a' }), listing({ id: 'b' })];
-  expect(buildComparison(['a', 'b'], two, NOW, testCfg).columns.map((c) => c.isBest))
-    .toEqual([true, true]);
+  expect(buildComparison(['a', 'b'], two, NOW, testCfg).columns.map((c) => c.isBest)).toEqual([
+    true,
+    true,
+  ]);
 });
 
 test('unknown parts are never shown as none', () => {
@@ -35,8 +40,11 @@ test('unknown parts are never shown as none', () => {
     listing({ id: 'some', parts: { p1: 'replaced' } }),
   ];
   const { rows } = buildComparison(['clean', 'blank', 'some'], cars, NOW, testCfg);
-  expect(rows.find((row) => row.label === 'Değişen parçalar')!.cells)
-    .toEqual(['Yok', 'Bilinmiyor', 'p1 (bilgi eksik)']);
+  expect(rows.find((row) => row.label === 'Değişen parçalar')!.cells).toEqual([
+    'Yok',
+    'Bilinmiyor',
+    'p1 (bilgi eksik)',
+  ]);
 });
 
 test('blank values show a dash and a stated empty record says so', () => {

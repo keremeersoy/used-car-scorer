@@ -5,7 +5,9 @@ import { compareUrl } from '../compare/url';
 import { formatMoney, strings } from '../strings';
 
 export function SavedList({
-  listings, onOpen, onRemove,
+  listings,
+  onOpen,
+  onRemove,
 }: {
   listings: Listing[];
   onOpen: (listing: Listing) => void;
@@ -59,14 +61,20 @@ export function SavedList({
                   >
                     {strings.confirmDeleteYes}
                   </button>
-                  <button type="button" onClick={() => setDeleting(null)}>{strings.cancel}</button>
+                  <button type="button" onClick={() => setDeleting(null)}>
+                    {strings.cancel}
+                  </button>
                 </span>
               ) : (
                 <span className="actions">
                   <button type="button" data-action="open" onClick={() => onOpen(listing)}>
                     {strings.open}
                   </button>
-                  <button type="button" data-action="delete" onClick={() => setDeleting(listing.id)}>
+                  <button
+                    type="button"
+                    data-action="delete"
+                    onClick={() => setDeleting(listing.id)}
+                  >
                     {strings.remove}
                   </button>
                 </span>

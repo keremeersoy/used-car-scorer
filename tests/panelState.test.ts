@@ -1,8 +1,13 @@
 import { editField, toListing } from '../src/draft/draft';
-import {
-  afterSave, discardAndReplace, expectedEntry, initialState, keepCurrent, receive,
-} from '../src/ui/panel/panelState';
 import type { Listing } from '../src/types';
+import {
+  afterSave,
+  discardAndReplace,
+  expectedEntry,
+  initialState,
+  keepCurrent,
+  receive,
+} from '../src/ui/panel/panelState';
 import { listing, NOW, page } from './helpers';
 
 const incoming = (o: Partial<Listing> = {}, recognised = true) => ({

@@ -1,10 +1,21 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { editField, editPart, takePageValue, type Draft, type EditKey, type FieldKey } from '../../draft/draft';
+import { type ReactNode, useEffect, useState } from 'react';
+import {
+  type Draft,
+  type EditKey,
+  editField,
+  editPart,
+  type FieldKey,
+  takePageValue,
+} from '../../draft/draft';
 import { config } from '../../scoring/config';
 import type { PartStatus } from '../../types';
-import { parsePrice, parseWholeNumber, parseYear, type ParsedNumber } from '../parse';
+import { type ParsedNumber, parsePrice, parseWholeNumber, parseYear } from '../parse';
 import {
-  fieldLabels, formatNumber, heavyDamageLabels, partStatusLabels, strings,
+  fieldLabels,
+  formatNumber,
+  heavyDamageLabels,
+  partStatusLabels,
+  strings,
 } from '../strings';
 
 type Change = (apply: (draft: Draft) => Draft) => void;
@@ -27,7 +38,14 @@ function describePageValue(key: EditKey, value: unknown): string {
 }
 
 function Row({
-  label, name, draft, current, onTake, error, hint, children,
+  label,
+  name,
+  draft,
+  current,
+  onTake,
+  error,
+  hint,
+  children,
 }: {
   label: string;
   name: EditKey;
@@ -41,6 +59,7 @@ function Row({
   const pageValue = draft.pageValues[name];
   return (
     <div className="row">
+      {/* biome-ignore lint/a11y/noLabelWithoutControl: the control is passed in as children */}
       <label>
         <span>{label}</span>
         {children}
@@ -60,7 +79,10 @@ function Row({
 }
 
 function NumberInput({
-  name, value, onValue, onValidity,
+  name,
+  value,
+  onValue,
+  onValidity,
 }: {
   name: NumberKey;
   value: number | null;
@@ -93,7 +115,9 @@ function NumberInput({
 }
 
 export function ListingForm({
-  draft, onChange, onValidity,
+  draft,
+  onChange,
+  onValidity,
 }: {
   draft: Draft;
   onChange: Change;
@@ -178,17 +202,28 @@ export function ListingForm({
         {textRow('fuel')}
         {textRow('gearbox')}
       </div>
-      <Row label={fieldLabels.heavyDamage} name="heavyDamage" draft={draft} current={listing.heavyDamage} onTake={take}>
+      <Row
+        label={fieldLabels.heavyDamage}
+        name="heavyDamage"
+        draft={draft}
+        current={listing.heavyDamage}
+        onTake={take}
+      >
         <select
           data-field="heavyDamage"
           className={heavy === 'unknown' ? 'unknown' : undefined}
           value={heavy}
           onChange={(event) =>
-            set('heavyDamage', event.target.value === 'unknown' ? null : event.target.value === 'yes')
+            set(
+              'heavyDamage',
+              event.target.value === 'unknown' ? null : event.target.value === 'yes',
+            )
           }
         >
           {(['unknown', 'yes', 'no'] as const).map((option) => (
-            <option key={option} value={option}>{heavyDamageLabels[option]}</option>
+            <option key={option} value={option}>
+              {heavyDamageLabels[option]}
+            </option>
           ))}
         </select>
       </Row>
@@ -199,7 +234,14 @@ export function ListingForm({
         {config.damage.parts.map(({ key, label }) => {
           const status = listing.parts[key] ?? 'unknown';
           return (
-            <Row key={key} label={label} name={`parts.${key}`} draft={draft} current={status} onTake={take}>
+            <Row
+              key={key}
+              label={label}
+              name={`parts.${key}`}
+              draft={draft}
+              current={status}
+              onTake={take}
+            >
               <select
                 data-field={`parts.${key}`}
                 className={status === 'unknown' ? 'unknown' : undefined}
@@ -209,7 +251,9 @@ export function ListingForm({
                 }
               >
                 {Object.entries(partStatusLabels).map(([value, text]) => (
-                  <option key={value} value={value}>{text}</option>
+                  <option key={value} value={value}>
+                    {text}
+                  </option>
                 ))}
               </select>
             </Row>
@@ -217,7 +261,13 @@ export function ListingForm({
         })}
       </div>
 
-      <Row label={fieldLabels.description} name="description" draft={draft} current={listing.description} onTake={take}>
+      <Row
+        label={fieldLabels.description}
+        name="description"
+        draft={draft}
+        current={listing.description}
+        onTake={take}
+      >
         <textarea
           data-field="description"
           rows={5}

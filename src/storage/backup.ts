@@ -7,7 +7,13 @@ export class BackupError extends Error {
 }
 
 const APP = 'usedCarScorer';
-const PART_STATUSES = new Set<unknown>(['original', 'localPaint', 'painted', 'replaced', 'unknown']);
+const PART_STATUSES = new Set<unknown>([
+  'original',
+  'localPaint',
+  'painted',
+  'replaced',
+  'unknown',
+]);
 
 type Check = (value: unknown) => boolean;
 
@@ -40,7 +46,9 @@ const fields = (now: Date): Record<keyof Listing, Check> => {
     model: optionalText,
     year: (v) =>
       v === null ||
-      (Number.isInteger(v) && (v as number) >= OLDEST_YEAR && (v as number) <= now.getFullYear() + 1),
+      (Number.isInteger(v) &&
+        (v as number) >= OLDEST_YEAR &&
+        (v as number) <= now.getFullYear() + 1),
     km: optionalNumber,
     fuel: optionalText,
     gearbox: optionalText,
@@ -59,11 +67,7 @@ const fields = (now: Date): Record<keyof Listing, Check> => {
 };
 
 export function toBackup(listings: Listing[], now: Date): string {
-  return JSON.stringify(
-    { app: APP, version: 1, exportedAt: now.toISOString(), listings },
-    null,
-    2,
-  );
+  return JSON.stringify({ app: APP, version: 1, exportedAt: now.toISOString(), listings }, null, 2);
 }
 
 /** An entry that was left out, and the first thing wrong with it (null: not a listing at all). */

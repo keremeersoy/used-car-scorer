@@ -1,65 +1,264 @@
-@import '../theme.css';
+@import "../theme.css";
 
-main { padding: 0 12px; }
+main {
+  padding: 0 12px;
+}
 header {
-  position: sticky; top: 0; z-index: 1;
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  padding: 10px 0; background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  background: var(--bg);
 }
-nav { display: flex; gap: 4px; }
-nav button[aria-current] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
-.banner { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 8px 12px; margin: 0 0 10px; }
-.banner p { margin: 0 0 6px; }
-.banner.error { color: var(--danger); }
-.banner button { color: var(--text); }
-.banner button.primary { color: var(--accent-text); }
-.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.empty { color: var(--muted); text-align: center; padding: 32px 8px; }
-.listing-heading { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
-.listing-heading span { color: var(--muted); white-space: nowrap; }
-.total { margin: 0 0 6px; color: var(--muted); }
-.total strong { font-size: 40px; line-height: 1.1; color: var(--text); }
-.no-total { margin: 0 0 6px; font-weight: 600; }
-.warnings { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
-.warnings li { background: var(--warn-bg); color: var(--warn-text); border-radius: 4px; padding: 2px 6px; }
-.warnings li.severe { background: var(--danger); color: var(--surface); font-weight: 700; width: 100%; }
-details { border-top: 1px solid var(--border); padding: 6px 0; }
-summary { cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
-summary::before { content: '▸'; color: var(--muted); }
-details[open] summary::before { content: '▾'; }
-summary span:first-of-type { flex: 1; }
-.points { font-variant-numeric: tabular-nums; font-weight: 600; }
-details ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); overflow-wrap: anywhere; }
-.note, small { color: var(--muted); font-size: 11px; }
-.note { margin: 4px 0 0; }
-h2 { font-size: 13px; margin: 14px 0 8px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); column-gap: 8px; align-items: start; }
-.row { margin-bottom: 8px; min-width: 0; }
-.row label { display: flex; flex-direction: column; gap: 2px; }
-.row small { display: block; margin-top: 2px; }
-.row small.error { color: var(--danger); }
-input:not([type='checkbox']), select, textarea {
-  width: 100%; padding: 5px 7px;
-  border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+nav {
+  display: flex;
+  gap: 4px;
 }
-.unknown { border-style: dashed !important; border-color: #c99a1b !important; }
-[aria-invalid='true'] { border-color: var(--danger) !important; }
-textarea { resize: vertical; }
-.footer { position: sticky; bottom: 0; display: flex; flex-direction: column; gap: 4px; padding: 10px 0; background: var(--bg); }
-.footer > button { width: 100%; padding: 8px; }
-.saved { list-style: none; margin: 0; padding: 0; }
-.saved label { display: flex; align-items: center; gap: 8px; }
-.saved-title { flex: 1; overflow-wrap: anywhere; }
-.saved-score { font-size: 18px; }
-.saved-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 6px; color: var(--muted); }
+nav button[aria-current] {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.banner {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 10px;
+}
+.banner p {
+  margin: 0 0 6px;
+}
+.banner.error {
+  color: var(--danger);
+}
+.banner button {
+  color: var(--text);
+}
+.banner button.primary {
+  color: var(--accent-text);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 32px 8px;
+}
+.listing-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+.listing-heading span {
+  color: var(--muted);
+  white-space: nowrap;
+}
+.total {
+  margin: 0 0 6px;
+  color: var(--muted);
+}
+.total strong {
+  font-size: 40px;
+  line-height: 1.1;
+  color: var(--text);
+}
+.no-total {
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+.warnings {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.warnings li {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.warnings li.severe {
+  background: var(--danger);
+  color: var(--surface);
+  font-weight: 700;
+  width: 100%;
+}
+details {
+  border-top: 1px solid var(--border);
+  padding: 6px 0;
+}
+summary {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+summary::before {
+  content: "▸";
+  color: var(--muted);
+}
+details[open] summary::before {
+  content: "▾";
+}
+summary span:first-of-type {
+  flex: 1;
+}
+.points {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+details ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.note,
+small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.note {
+  margin: 4px 0 0;
+}
+h2 {
+  font-size: 13px;
+  margin: 14px 0 8px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  column-gap: 8px;
+  align-items: start;
+}
+.row {
+  margin-bottom: 8px;
+  min-width: 0;
+}
+.row label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.row small {
+  display: block;
+  margin-top: 2px;
+}
+.row small.error {
+  color: var(--danger);
+}
+input:not([type="checkbox"]),
+select,
+textarea {
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.unknown {
+  /* biome-ignore lint/complexity/noImportantStyles: the marker must beat the input border */
+  border-style: dashed !important;
+  /* biome-ignore lint/complexity/noImportantStyles: the marker must beat the input border */
+  border-color: #c99a1b !important;
+}
+[aria-invalid="true"] {
+  /* biome-ignore lint/complexity/noImportantStyles: an invalid field outranks an unknown one */
+  border-color: var(--danger) !important;
+}
+textarea {
+  resize: vertical;
+}
+.footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  background: var(--bg);
+}
+.footer > button {
+  width: 100%;
+  padding: 8px;
+}
+.saved {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.saved label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.saved-title {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.saved-score {
+  font-size: 18px;
+}
+.saved-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--muted);
+}
 /* Without this the buttons inherit the muted text colour and look disabled. */
-.saved-meta button { color: var(--text); }
-.saved-meta button.danger { color: var(--danger); }
+.saved-meta button {
+  color: var(--text);
+}
+.saved-meta button.danger {
+  color: var(--danger);
+}
 
-.backup { margin: 16px 0; }
-.backup .banner { margin-top: 8px; }
+.backup {
+  margin: 16px 0;
+}
+.backup .banner {
+  margin-top: 8px;
+}
 /* The file input stays focusable but invisible; its label looks like a button. */
-.file-button { position: relative; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; }
-.file-button input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
-.file-button:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.file-button {
+  position: relative;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.file-button input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.file-button:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

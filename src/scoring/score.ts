@@ -1,5 +1,5 @@
 import type { Listing, Scorable } from '../types';
-import { config, type Config } from './config';
+import { type Config, config } from './config';
 import { scoreDamage } from './damage';
 import { scoreDescription } from './description';
 import { scoreKm } from './km';

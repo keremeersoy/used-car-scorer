@@ -16,7 +16,14 @@ test('fixed price labels', () => {
 test('a median names its sample size; no reference says so', () => {
   expect(
     reasonText(
-      { code: 'priceBand', band: 'normal', diff: 0, reference: 1_000_000, source: 'median', count: 6 },
+      {
+        code: 'priceBand',
+        band: 'normal',
+        diff: 0,
+        reference: 1_000_000,
+        source: 'median',
+        count: 6,
+      },
       String,
     ),
   ).toContain('6 ilan');
@@ -33,8 +40,9 @@ test('a description match quotes its sentence and marks negation', () => {
 });
 
 test('points show at most one decimal, in Turkish format', () => {
-  expect(reasonText({ code: 'record', amount: 33_333, points: 3.3333 }, String))
-    .toBe('Hasar kaydı 33.333 TL: −3,3 puan');
+  expect(reasonText({ code: 'record', amount: 33_333, points: 3.3333 }, String)).toBe(
+    'Hasar kaydı 33.333 TL: −3,3 puan',
+  );
 });
 
 test('the low km warning uses the agreed wording', () => {

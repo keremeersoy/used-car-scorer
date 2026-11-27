@@ -21,7 +21,10 @@ test('rescales when the description is left out', () => {
 });
 
 test.each<[MissingField, Partial<Listing>]>([
-  ['price', { price: null }], ['price', { price: 0 }], ['km', { km: null }], ['year', { year: null }],
+  ['price', { price: null }],
+  ['price', { price: 0 }],
+  ['km', { km: null }],
+  ['year', { year: null }],
 ])('no total without %s', (field, o) => {
   const result = run(o);
   expect(result.total).toBeNull();

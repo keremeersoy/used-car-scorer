@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toListing, type Draft } from '../../draft/draft';
+import { type Draft, toListing } from '../../draft/draft';
 import { extract } from '../../extract/extract';
 import { unrecognised } from '../../extract/types';
 import { createSequence } from '../../read/latest';
-import { chromeTabApi, readTab, type ReadOutcome } from '../../read/readTab';
+import { chromeTabApi, type ReadOutcome, readTab } from '../../read/readTab';
 import { requestKey, takeReadRequest } from '../../read/request';
 import { config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
@@ -14,8 +14,14 @@ import { useListings } from '../useListings';
 import { Backup } from './Backup';
 import { ListingForm } from './ListingForm';
 import {
-  afterSave, discardAndReplace, expectedEntry, initialState, keepCurrent, receive,
-  savedWhileEditing, type ReadResult,
+  afterSave,
+  discardAndReplace,
+  expectedEntry,
+  initialState,
+  keepCurrent,
+  type ReadResult,
+  receive,
+  savedWhileEditing,
 } from './panelState';
 import { ReplacePrompt } from './ReplacePrompt';
 import { SavedList } from './SavedList';
@@ -85,6 +91,7 @@ export function App() {
   };
 
   const { draft } = state;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: these changes make a pending question stale
   useEffect(() => setConflict(null), [state.revision, draft?.listing.id]);
 
   const canSave = draft !== null && draft.listing.id !== '' && formValid;
@@ -121,9 +128,7 @@ export function App() {
   };
 
   const change = (apply: (current: Draft) => Draft) =>
-    setState((current) =>
-      current.draft ? { ...current, draft: apply(current.draft) } : current,
-    );
+    setState((current) => (current.draft ? { ...current, draft: apply(current.draft) } : current));
 
   const justSaved = draft !== null && !draft.dirty && savedRevision === state.revision;
 
@@ -148,7 +153,11 @@ export function App() {
         </button>
       </header>
 
-      {error && <p className="banner error" role="alert">{error}</p>}
+      {error && (
+        <p className="banner error" role="alert">
+          {error}
+        </p>
+      )}
 
       {/* Both tabs stay mounted so half-typed values survive switching. */}
       <div hidden={tab !== 'listing'}>
@@ -190,7 +199,12 @@ export function App() {
               {conflict ? (
                 <div className="actions">
                   <span>{strings.overwrite}</span>
-                  <button type="button" className="danger" data-action="overwrite" onClick={() => void saveDraft(conflict)}>
+                  <button
+                    type="button"
+                    className="danger"
+                    data-action="overwrite"
+                    onClick={() => void saveDraft(conflict)}
+                  >
                     {strings.overwriteConfirm}
                   </button>
                   <button type="button" onClick={() => setConflict(null)}>
@@ -208,9 +222,7 @@ export function App() {
                   >
                     {justSaved ? strings.saved : strings.save}
                   </button>
-                  {!canSave && (
-                    <small>{formValid ? strings.needId : strings.fixInvalid}</small>
-                  )}
+                  {!canSave && <small>{formValid ? strings.needId : strings.fixInvalid}</small>}
                 </>
               )}
             </div>

@@ -2,35 +2,39 @@
 // saved by hand. Only DOM APIs that work on a detached document are used.
 import { config } from '../scoring/config';
 import type { PartStatus } from '../types';
-import { parseWholeNumber, parseYear, type ParsedNumber } from '../ui/parse';
+import { type ParsedNumber, parseWholeNumber, parseYear } from '../ui/parse';
 import { description } from './description';
-import { unrecognised, type ExtractNotice, type ExtractResult } from './types';
+import { type ExtractNotice, type ExtractResult, unrecognised } from './types';
 
 /** Our part key for each class name in the page's paint diagram. */
 // Maps, because class names come from the page and must not reach object internals.
-const PART_CLASSES = new Map(Object.entries({
-  roof: 'roof',
-  'front-hood': 'hood',
-  'rear-hood': 'trunk',
-  'front-bumper': 'frontBumper',
-  'rear-bumper': 'rearBumper',
-  'front-left-mudguard': 'leftFrontFender',
-  'front-right-mudguard': 'rightFrontFender',
-  'rear-left-mudguard': 'leftRearFender',
-  'rear-right-mudguard': 'rightRearFender',
-  'front-left-door': 'leftFrontDoor',
-  'front-right-door': 'rightFrontDoor',
-  'rear-left-door': 'leftRearDoor',
-  'rear-right-door': 'rightRearDoor',
-}));
+const PART_CLASSES = new Map(
+  Object.entries({
+    roof: 'roof',
+    'front-hood': 'hood',
+    'rear-hood': 'trunk',
+    'front-bumper': 'frontBumper',
+    'rear-bumper': 'rearBumper',
+    'front-left-mudguard': 'leftFrontFender',
+    'front-right-mudguard': 'rightFrontFender',
+    'rear-left-mudguard': 'leftRearFender',
+    'rear-right-mudguard': 'rightRearFender',
+    'front-left-door': 'leftFrontDoor',
+    'front-right-door': 'rightFrontDoor',
+    'rear-left-door': 'leftRearDoor',
+    'rear-right-door': 'rightRearDoor',
+  }),
+);
 
 /** A part counts as anything, original included, only when the diagram says so. */
-const STATUS_CLASSES = new Map<string, PartStatus>(Object.entries({
-  'original-new': 'original',
-  'local-painted-new': 'localPaint',
-  'painted-new': 'painted',
-  'changed-new': 'replaced',
-} satisfies Record<string, PartStatus>));
+const STATUS_CLASSES = new Map<string, PartStatus>(
+  Object.entries({
+    'original-new': 'original',
+    'local-painted-new': 'localPaint',
+    'painted-new': 'painted',
+    'changed-new': 'replaced',
+  } satisfies Record<string, PartStatus>),
+);
 
 const clean = (text: string | null | undefined) => text?.replace(/\s+/g, ' ').trim() || null;
 

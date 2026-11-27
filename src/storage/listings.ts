@@ -37,7 +37,13 @@ export class ConflictError extends Error {
 const canonical = (value: unknown) =>
   JSON.stringify(value, (key, v) => {
     if (key === 'updatedAt') return undefined;
-    return isObject(v) ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]])) : v;
+    return isObject(v)
+      ? Object.fromEntries(
+          Object.keys(v)
+            .sort()
+            .map((k) => [k, v[k]]),
+        )
+      : v;
   });
 
 /** When the entry last changed. A correction keeps savedAt, so that alone is not enough. */
@@ -90,9 +96,7 @@ export function createListingStore(
     /** Newest first. */
     async getAll(): Promise<Listing[]> {
       const { listings } = await read();
-      return Object.values(listings).sort(
-        (a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt),
-      );
+      return Object.values(listings).sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
     },
     /** With `replacing`, writes only if the saved entry still is that one (null: none). */
     async save(listing: Listing, expected?: { replacing: Listing | null }): Promise<void> {

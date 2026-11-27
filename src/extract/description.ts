@@ -1,4 +1,18 @@
-const BLOCKS = new Set(['P', 'DIV', 'LI', 'UL', 'OL', 'TABLE', 'TR', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
+const BLOCKS = new Set([
+  'P',
+  'DIV',
+  'LI',
+  'UL',
+  'OL',
+  'TABLE',
+  'TR',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+]);
 const SKIPPED = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT']);
 
 /**
@@ -27,6 +41,9 @@ export function description(doc: Document): string | null {
     if (block) text += '\n';
   };
   walk(root);
-  const lines = text.split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const lines = text
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
   return lines.join('\n') || null;
 }

@@ -8,7 +8,7 @@ const CLAUSE = /;|(?<!\d),|,(?!\d)/;
 // Fold both Turkish i letters so "ACIL", "ACİL" and "acil" match.
 const fold = (text: string) => text.toLocaleLowerCase('tr-TR').replaceAll('ı', 'i');
 
-const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const PLAIN: Record<string, string> = { ğ: 'g', ş: 's', ç: 'c', ö: 'o', ü: 'u' };
 
@@ -29,7 +29,7 @@ function phrasePattern(variants: string[]): RegExp {
   const options = variants
     .flatMap(spellings)
     .filter(Boolean)
-    .map((spelling) => spelling.split(/\s+/).map(escape).join('\\s+'));
+    .map((spelling) => spelling.split(/\s+/).map(escapeRegExp).join('\\s+'));
   return new RegExp(`(?<![\\p{L}\\p{N}])(?:${options.join('|')})`, 'gu');
 }
 
@@ -99,9 +99,7 @@ function isNegated(
 /** The words following a match, within its clause; only these can negate it. */
 const wordsAfter = (clause: string, match: RegExpExecArray) =>
   wordsOf(
-    clause
-      .slice(match.index + match[0].length)
-      .replace(/^\p{L}+/u, ''), // the rest of the word, such as a suffix
+    clause.slice(match.index + match[0].length).replace(/^\p{L}+/u, ''), // the rest of the word, such as a suffix
   );
 
 /**
@@ -112,9 +110,7 @@ function skipJoinedWarnings(after: string[], cfg: Config['description']): string
   const split = (words: string[]) => [...allSpellings(words)].map((word) => word.split(/\s+/));
   const nouns = allSpellings(cfg.connectorNouns);
   const connectors = split(cfg.connectors);
-  const warnings = split(
-    cfg.phrases.filter(([name]) => cfg.connectable.includes(name!)).flat(),
-  );
+  const warnings = split(cfg.phrases.filter(([name]) => cfg.connectable.includes(name!)).flat());
   // The last word of a phrase may carry a suffix.
   const startsAt = (at: number, phrase: string[]) =>
     phrase.every((word, i) => {

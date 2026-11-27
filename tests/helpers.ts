@@ -1,4 +1,4 @@
-import { config, type Config } from '../src/scoring/config';
+import { type Config, config } from '../src/scoring/config';
 import type { Listing, PageRead, PartStatus } from '../src/types';
 
 export const NOW = new Date('2026-11-27T12:00:00Z');
@@ -39,7 +39,11 @@ export function listing(overrides: Partial<Listing> = {}): Listing {
 
 /** The same listing as a page read would report it. */
 export function page(overrides: Partial<Listing> = {}): PageRead {
-  const { savedAt: _savedAt, referencePrice: _reference, editedFields: _edited, ...read } =
-    listing(overrides);
+  const {
+    savedAt: _savedAt,
+    referencePrice: _reference,
+    editedFields: _edited,
+    ...read
+  } = listing(overrides);
   return read;
 }

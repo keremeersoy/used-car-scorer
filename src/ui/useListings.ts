@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  ConflictError, createListingStore, STORE_KEY, StorageDataError, type RestoreResult,
+  ConflictError,
+  createListingStore,
+  type RestoreResult,
+  STORE_KEY,
+  StorageDataError,
 } from '../storage/listings';
 import type { Listing } from '../types';
 import { strings } from './strings';

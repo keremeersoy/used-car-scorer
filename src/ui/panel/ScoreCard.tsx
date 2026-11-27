@@ -1,6 +1,11 @@
 import type { ScoreResult, SectionKey } from '../../scoring/types';
 import {
-  fieldLabels, formatNumber, reasonText, sectionLabels, strings, warningText,
+  fieldLabels,
+  formatNumber,
+  reasonText,
+  sectionLabels,
+  strings,
+  warningText,
 } from '../strings';
 
 const ORDER: SectionKey[] = ['damage', 'price', 'km', 'description'];
@@ -57,6 +62,7 @@ export function ScoreCard({
             </summary>
             <ul>
               {section.reasons.map((reason, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: reasons have no identity and never reorder
                 <li key={index}>{reasonText(reason, partLabel)}</li>
               ))}
               {section.reasons.length === 0 &&
@@ -64,7 +70,11 @@ export function ScoreCard({
               {section.reasons.length === 0 && section.warnings.length === 0 && (
                 // Full marks still need a reason.
                 <li>
-                  {key === 'damage' ? strings.noDeductions : key === 'description' ? strings.noPhrases : '—'}
+                  {key === 'damage'
+                    ? strings.noDeductions
+                    : key === 'description'
+                      ? strings.noPhrases
+                      : '—'}
                 </li>
               )}
             </ul>

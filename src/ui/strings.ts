@@ -1,7 +1,7 @@
 // All Turkish copy lives here.
 import { config } from '../scoring/config';
-import type { Rejected } from '../storage/backup';
 import type { PriceBand, Reason, SectionKey, Warning } from '../scoring/types';
+import type { Rejected } from '../storage/backup';
 import type { Listing, PartStatus } from '../types';
 import type { Notice } from './panel/panelState';
 

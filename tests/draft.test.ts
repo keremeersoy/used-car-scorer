@@ -1,5 +1,11 @@
 import {
-  draftFromPage, draftFromSaved, editField, editPart, emptyDraft, takePageValue, toListing,
+  draftFromPage,
+  draftFromSaved,
+  editField,
+  editPart,
+  emptyDraft,
+  takePageValue,
+  toListing,
 } from '../src/draft/draft';
 import { listing, NOW, page } from './helpers';
 
@@ -36,7 +42,12 @@ test('a field the owner cleared stays cleared', () => {
 
 test('a first read takes the page as it is', () => {
   const draft = draftFromPage({ ...page({ engine: null }), id: null }, undefined);
-  expect(draft.listing).toMatchObject({ id: '', engine: null, referencePrice: null, editedFields: [] });
+  expect(draft.listing).toMatchObject({
+    id: '',
+    engine: null,
+    referencePrice: null,
+    editedFields: [],
+  });
   expect(draft).toMatchObject({ savedAt: null, fromPage: true, dirty: false });
 });
 

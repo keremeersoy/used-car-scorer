@@ -1,4 +1,9 @@
-import { ConflictError, createListingStore, STORE_KEY, StorageDataError } from '../src/storage/listings';
+import {
+  ConflictError,
+  createListingStore,
+  STORE_KEY,
+  StorageDataError,
+} from '../src/storage/listings';
 import { listing } from './helpers';
 
 /** In-memory stand-in for chrome.storage: asynchronous, and it copies values like the real one. */
@@ -19,8 +24,10 @@ test('same id updates, newest first, remove deletes', async () => {
   await store.save(listing({ id: '1', savedAt: '2026-11-01T00:00:00Z' }));
   await store.save(listing({ id: '2', savedAt: '2026-11-02T00:00:00Z' }));
   await store.save(listing({ id: ' 1 ', price: 900_000, savedAt: '2026-11-03T00:00:00Z' }));
-  expect((await store.getAll()).map((l) => [l.id, l.price]))
-    .toEqual([['1', 900_000], ['2', 1_000_000]]);
+  expect((await store.getAll()).map((l) => [l.id, l.price])).toEqual([
+    ['1', 900_000],
+    ['2', 1_000_000],
+  ]);
   await store.remove('1');
   expect((await store.getAll()).map((l) => l.id)).toEqual(['2']);
 });
@@ -82,7 +89,9 @@ test('a save that expects an older entry is refused and changes nothing', async 
   const first = listing({ km: 100 });
   await store.save(first, { replacing: null });
   await store.save({ ...first, km: 200 }, { replacing: first });
-  await expect(store.save({ ...first, km: 300 }, { replacing: first })).rejects.toThrow(ConflictError);
+  await expect(store.save({ ...first, km: 300 }, { replacing: first })).rejects.toThrow(
+    ConflictError,
+  );
   await expect(store.save(first, { replacing: null })).rejects.toThrow(ConflictError);
   expect((await store.getAll())[0]!.km).toBe(200);
 });

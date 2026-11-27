@@ -3,7 +3,8 @@ import { isSahibindenUrl, readTab } from '../src/read/readTab';
 import { requestKey, takeReadRequest } from '../src/read/request';
 
 test.each(['https://www.sahibinden.com/ilan/x', 'https://sahibinden.com/'])('reads %s', (url) =>
-  expect(isSahibindenUrl(url)).toBe(true));
+  expect(isSahibindenUrl(url)).toBe(true),
+);
 
 test.each([
   'https://sahibinden.com.evil.com/',
@@ -30,8 +31,9 @@ test('never injects elsewhere or without a visible URL', async () => {
 test('reads, rechecks the returned URL, and maps injection errors', async () => {
   const url = 'https://www.sahibinden.com/ilan/x';
   expect(await readTab(1, api(url))).toEqual({ kind: 'ok', html: '<p>', url });
-  expect(await readTab(1, api(url, { html: '', url: 'https://example.com' })))
-    .toEqual({ kind: 'notSahibinden' });
+  expect(await readTab(1, api(url, { html: '', url: 'https://example.com' }))).toEqual({
+    kind: 'notSahibinden',
+  });
   const broken = {
     getUrl: async () => url,
     copyPage: async (): Promise<never> => {
@@ -54,8 +56,7 @@ function fakeSession(initial: Record<string, unknown>) {
 }
 
 test('a request is taken once and expires', async () => {
-  const make = (at: number) =>
-    fakeSession({ [requestKey(7)]: { windowId: 7, tabId: 3, at } });
+  const make = (at: number) => fakeSession({ [requestKey(7)]: { windowId: 7, tabId: 3, at } });
   const area = make(1_000);
   expect(await takeReadRequest(area, 7, 2_000)).toMatchObject({ tabId: 3 });
   expect(await takeReadRequest(area, 7, 2_000)).toBeNull();

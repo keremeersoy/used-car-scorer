@@ -16,8 +16,19 @@ export interface Draft {
 }
 
 const DATA_FIELDS = [
-  'title', 'price', 'brand', 'series', 'model', 'year', 'km', 'fuel', 'gearbox', 'engine',
-  'heavyDamage', 'damageRecordTL', 'description',
+  'title',
+  'price',
+  'brand',
+  'series',
+  'model',
+  'year',
+  'km',
+  'fuel',
+  'gearbox',
+  'engine',
+  'heavyDamage',
+  'damageRecordTL',
+  'description',
 ] as const satisfies readonly Exclude<keyof ListingData, 'parts'>[];
 
 const PART_PREFIX = 'parts.';
@@ -88,11 +99,7 @@ export function draftFromPage(page: PageRead, saved: Listing | undefined): Draft
     if (key.startsWith(PART_PREFIX)) partKeys.add(key.slice(PART_PREFIX.length));
   }
   for (const part of partKeys) {
-    const status = merge(
-      `parts.${part}`,
-      known(page.parts[part]),
-      known(saved?.parts[part]),
-    );
+    const status = merge(`parts.${part}`, known(page.parts[part]), known(saved?.parts[part]));
     listing.parts[part] = status ?? 'unknown';
   }
 

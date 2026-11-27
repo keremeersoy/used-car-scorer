@@ -1,4 +1,4 @@
-import { requestKey, type ReadRequest } from './read/request';
+import { type ReadRequest, requestKey } from './read/request';
 
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id === undefined) return;

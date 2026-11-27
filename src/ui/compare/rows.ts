@@ -1,10 +1,17 @@
-import { config, type Config } from '../../scoring/config';
+import { type Config, config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
 import type { ScoreResult, SectionKey } from '../../scoring/types';
 import type { Listing, PartStatus } from '../../types';
 import {
-  compareLabels, fieldLabels, formatMoney, formatNumber, heavyDamageLabels, partStatusLabels,
-  sectionLabels, strings, warningText,
+  compareLabels,
+  fieldLabels,
+  formatMoney,
+  formatNumber,
+  heavyDamageLabels,
+  partStatusLabels,
+  sectionLabels,
+  strings,
+  warningText,
 } from '../strings';
 
 export interface Column {
@@ -84,7 +91,9 @@ export function buildComparison(
   });
 
   const rows: Row[] = [
-    row(compareLabels.total, (_, result) => (result.total === null ? BLANK : `${result.total} / 100`)),
+    row(compareLabels.total, (_, result) =>
+      result.total === null ? BLANK : `${result.total} / 100`,
+    ),
     ...SECTIONS.map((key) => row(sectionLabels[key], (_, result) => sectionCell(result, key))),
     row(fieldLabels.price, (l) => (l.price === null ? BLANK : formatMoney(l.price))),
     row(fieldLabels.referencePrice, referenceCell),

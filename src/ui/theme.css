@@ -27,15 +27,28 @@
     --best-bg: #1e3a26;
   }
 }
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 13px/1.45 system-ui, sans-serif;
+  font:
+    13px / 1.45 system-ui,
+    sans-serif;
 }
-[hidden] { display: none !important; }
-button, input, select, textarea { font: inherit; color: inherit; }
+[hidden] {
+  /* biome-ignore lint/complexity/noImportantStyles: hidden must beat any display rule */
+  display: none !important;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
 button {
   padding: 5px 10px;
   border: 1px solid var(--border);
@@ -43,8 +56,28 @@ button {
   background: var(--surface);
   cursor: pointer;
 }
-button:disabled { opacity: 0.5; cursor: default; }
-button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
-button.danger { border-color: var(--danger); color: var(--danger); }
-button.link { border: 0; padding: 0; background: none; color: var(--accent); text-decoration: underline; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+button.link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

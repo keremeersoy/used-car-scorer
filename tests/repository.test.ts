@@ -12,10 +12,10 @@ const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: '
 // Samples are assembled from pieces so this file does not trip its own check.
 test.each([
   ['a mobile number', ['0532', '123', '45', '67'].join(' ')],
-  ['a mobile number with a country code', '+90' + '5321234567'],
+  ['a mobile number with a country code', ['+90', '5321234567'].join('')],
   ['a personal email', 'someone' + '@' + 'gmail.com'],
-  ['a home folder path', '/Users' + '/someone/project'],
-  ['a private key', '-----BEGIN ' + 'PRIVATE KEY-----'],
+  ['a home folder path', ['/Users', 'someone', 'project'].join('/')],
+  ['a private key', ['-----BEGIN', 'PRIVATE KEY-----'].join(' ')],
   ['a GitHub token', 'ghp_' + 'a'.repeat(36)],
 ])('detects %s', (_, sample) => {
   expect(findLeaks(`text ${sample} text`)).toHaveLength(1);
@@ -40,6 +40,7 @@ test('no tracked file leaks anything', () => {
 });
 
 test('saved listing pages and local work files are never tracked', () => {
-  const forbidden = /^(fixtures|\.superpowers|dist|node_modules)\/|\.(mhtml|pem|key|env)$|sahibinden.*\.html$|\.expected\.json$/;
+  const forbidden =
+    /^(fixtures|\.superpowers|dist|node_modules)\/|\.(mhtml|pem|key|env)$|sahibinden.*\.html$|\.expected\.json$/;
   expect(tracked.filter((file) => forbidden.test(file))).toEqual([]);
 });

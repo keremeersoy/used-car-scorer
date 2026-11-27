@@ -29,7 +29,9 @@ describe.skipIf(!pages.length)('saved pages', () => {
   test('every part on the pages is in the configured list', () => {
     const keys = config.damage.parts.map((part) => part.key);
     for (const file of pages) {
-      expect(keys).toEqual(expect.arrayContaining(Object.keys(load(file).expected.result.read.parts)));
+      expect(keys).toEqual(
+        expect.arrayContaining(Object.keys(load(file).expected.result.read.parts)),
+      );
     }
   });
 
@@ -67,7 +69,9 @@ describe.skipIf(!pages.length)('saved pages', () => {
 
   test.each(['', 'Belirtilmemiş'])('heavy damage "%s" is unknown, not "no"', (text) => {
     const result = variant((doc) => {
-      const label = [...doc.querySelectorAll('dt')].find((dt) => dt.textContent!.trim() === 'Ağır Hasar Kayıtlı')!;
+      const label = [...doc.querySelectorAll('dt')].find(
+        (dt) => dt.textContent!.trim() === 'Ağır Hasar Kayıtlı',
+      )!;
       label.nextElementSibling!.textContent = text;
     });
     expect(result.read.heavyDamage).toBeNull();
@@ -103,16 +107,21 @@ test.each(['__proto__', 'constructor', '12a', ''])('listing number %j is not acc
 });
 
 test.each(['constructor original-new', 'roof constructor', '__proto__ toString'])(
-  'diagram classes "%s" add nothing', (classes) => {
+  'diagram classes "%s" add nothing',
+  (classes) => {
     const { recognised, read } = extract(minimal('123', classes), 'u');
     expect(recognised).toBe(true);
     expect(Object.keys(read.parts)).toEqual(config.damage.parts.map((part) => part.key));
     expect(new Set(Object.values(read.parts))).toEqual(new Set(['unknown']));
-  });
+  },
+);
 
 const priced = (price: string) =>
-  extract(parse(`<div class="classifiedInfo">${price}
-    <dl><dt>KM</dt><dd>1.000</dd><dd id="classifiedId">5</dd></dl></div>`), 'u');
+  extract(
+    parse(`<div class="classifiedInfo">${price}
+    <dl><dt>KM</dt><dd>1.000</dd><dd id="classifiedId">5</dd></dl></div>`),
+    'u',
+  );
 
 test.each([
   '<h3 class="classifiedPriceValue">1.250.000 ₺</h3>',

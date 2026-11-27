@@ -1,4 +1,4 @@
-import { draftFromPage, draftFromSaved, emptyDraft, type Draft } from '../../draft/draft';
+import { type Draft, draftFromPage, draftFromSaved, emptyDraft } from '../../draft/draft';
 import type { ExtractNotice, ExtractResult } from '../../extract/types';
 import type { Listing } from '../../types';
 
