@@ -121,6 +121,7 @@ export function buildComparison(
         value: (_, result) => result.sections[key].points,
       }),
     ),
+    row(fieldLabels.note, (l) => l.note || BLANK),
     row(fieldLabels.price, (l) => (l.price === null ? BLANK : formatMoney(l.price)), {
       value: (l) => l.price,
       lower: true,

@@ -23,6 +23,7 @@ export const strings = {
   extraTitle: 'Satıcıdan öğrendiklerin',
   extraHint: 'İlanda yazmayan bilgileri ekle, puan hemen güncellensin.',
   bodyTitle: 'Kaporta',
+  noteHint: 'Sadece sende kalır. Satıcıyla konuştukların, pazarlık, randevu…',
   bodyHint: 'Durumunu değiştirmek için bir parçayı seç.',
   breakdownTitle: 'Puan dökümü',
   breakdownHint: 'Nedenlerini görmek için bir satırı aç.',
@@ -99,6 +100,7 @@ export const fieldLabels = {
   heavyDamage: 'Ağır hasar kaydı',
   damageRecordTL: 'Hasar kaydı / tramer (TL)',
   description: 'Açıklama',
+  note: 'Notun',
 } as const;
 
 export const compareLabels = {

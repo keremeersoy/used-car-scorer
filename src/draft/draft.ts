@@ -1,6 +1,6 @@
 import type { Listing, ListingData, PageRead, PartStatus } from '../types';
 
-export type FieldKey = Exclude<keyof ListingData, 'parts'> | 'id' | 'referencePrice';
+export type FieldKey = Exclude<keyof ListingData, 'parts'> | 'id' | 'referencePrice' | 'note';
 export type EditKey = FieldKey | `parts.${string}`;
 
 /** A listing being reviewed. Every function here returns a new draft. */
@@ -51,6 +51,7 @@ const blank = (url: string): Draft['listing'] => ({
   parts: {},
   description: null,
   referencePrice: null,
+  note: null,
   editedFields: [],
 });
 
@@ -83,7 +84,9 @@ export function draftFromPage(page: PageRead, saved: Listing | undefined): Draft
 
   const listing = blank(page.url);
   listing.id = page.id ?? saved?.id ?? '';
+  // Never on the page, so they always come from the saved entry.
   listing.referencePrice = saved?.referencePrice ?? null;
+  listing.note = saved?.note ?? null;
   listing.editedFields = [...edited];
 
   const target = listing as unknown as Record<string, unknown>;

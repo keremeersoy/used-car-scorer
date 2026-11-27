@@ -25,6 +25,8 @@ export interface Listing extends ListingData {
   /** Set on every write. Absent on entries saved before it existed. */
   updatedAt?: string;
   referencePrice: number | null; // entered by hand
+  /** The owner's own words about this listing. Absent on entries saved before notes existed. */
+  note?: string | null;
   editedFields: string[];
 }
 

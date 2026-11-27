@@ -63,3 +63,9 @@ test('each row marks its best car: higher points, lower price and km', () => {
   expect(best('Km')).toEqual([false, true]);
   expect(best('Yakıt')).toEqual([false, false]);
 });
+
+test('each car shows its note', () => {
+  const cars = [listing({ id: 'a', note: 'Lastikler yeni' }), listing({ id: 'b' })];
+  const { rows } = buildComparison(['a', 'b'], cars, NOW, testCfg);
+  expect(rows.find((row) => row.label === 'Notun')!.cells).toEqual(['Lastikler yeni', '—']);
+});

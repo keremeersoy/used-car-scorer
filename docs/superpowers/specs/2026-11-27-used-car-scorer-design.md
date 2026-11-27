@@ -87,6 +87,7 @@ A full tab (`compare.html`, listing ids in the URL), one column per listing, scr
 - Saving an existing number updates that entry. `savedAt` is refreshed only when the draft came from a page read, so editing an old entry from the list does not make its price look current **(call)**.
 - **Reading a saved listing again (call):** fields the owner typed or corrected keep the typed value, and the panel shows the page's value beside it when they differ, with a way to take the page's value. Fields never edited take the new page value, except that a value the page no longer states keeps the saved one. `referencePrice` is always kept. This needs `editedFields` in the record, tracked per part for `parts`.
 - Scores are never stored. They are calculated when shown, so a saved listing's score can change as the median, the current year or the config changes **(call)**.
+- **Notes (added later):** each listing can carry the owner's note (up to 2000 characters). It is never taken from the page, survives re-reads, is shown in the saved list and compare view, is part of backups, and does not affect the score.
 - Storage errors are shown, never swallowed.
 - A save replaces a saved entry only if it is still the one the draft started from; otherwise the owner is asked.
 - **Backup (added later):** the saved list can be exported to a JSON file and restored from one. A restore checks every field, leaves out broken entries and names them, and replaces a saved entry only with one changed later (`updatedAt`, set on every write; older entries fall back to `savedAt`).
@@ -115,6 +116,7 @@ interface Listing {
   parts: Record<string, PartStatus>;
   description: string | null;
   referencePrice: number | null;   // entered by hand
+  note?: string | null;            // the owner's own words; added later
   editedFields: string[];
 }
 ```

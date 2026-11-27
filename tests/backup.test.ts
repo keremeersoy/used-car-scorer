@@ -107,3 +107,10 @@ test('the same listing twice in a file is counted once, newest first', async () 
   expect(result).toEqual({ added: 1, updated: 0, skipped: 1 });
   expect((await store.getAll()).map((l) => l.km)).toEqual([2]);
 });
+
+test('notes are backed up, and older backups without them still load', () => {
+  const noted = listing({ note: 'Satıcı ile konuştum' });
+  expect(parseBackup(toBackup([noted], NOW), NOW).listings).toEqual([noted]);
+  expect(parseBackup(file({ note: undefined }), NOW).listings).toHaveLength(1);
+  expect(parseBackup(file({ note: 5 }), NOW).rejected).toMatchObject([{ field: 'note' }]);
+});

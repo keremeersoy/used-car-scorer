@@ -51,6 +51,7 @@ export function SavedList({
                     <li key={fact}>{fact}</li>
                   ))}
               </ul>
+              {listing.note && <p className="saved-note">{listing.note}</p>}
               <div className="saved-meta">
                 <label>
                   <input

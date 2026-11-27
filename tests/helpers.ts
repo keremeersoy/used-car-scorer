@@ -32,6 +32,7 @@ export function listing(overrides: Partial<Listing> = {}): Listing {
     parts: Object.fromEntries(partKeys.map((key) => [key, 'original' as PartStatus])),
     description: 'Temiz araç.',
     referencePrice: null,
+    note: null,
     editedFields: [],
     ...overrides,
   };
@@ -42,6 +43,7 @@ export function page(overrides: Partial<Listing> = {}): PageRead {
   const {
     savedAt: _savedAt,
     referencePrice: _reference,
+    note: _note,
     editedFields: _edited,
     ...read
   } = listing(overrides);

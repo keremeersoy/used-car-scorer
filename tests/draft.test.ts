@@ -76,3 +76,17 @@ test('editing marks the draft dirty once per key and leaves the original alone',
   expect(empty.listing.parts).toEqual({});
   expect(empty.dirty).toBe(false);
 });
+
+test('a note stays with the listing when the page is read again', () => {
+  const noted = listing({ note: 'Pazarlık payı var' });
+  expect(draftFromPage(page(), noted).listing.note).toBe('Pazarlık payı var');
+  expect(draftFromPage(page(), undefined).listing.note).toBeNull();
+  const edited = editField(draftFromSaved(noted), 'note', 'Randevu cumartesi');
+  expect(toListing(edited, NOW).note).toBe('Randevu cumartesi');
+});
+
+test('an entry saved before notes existed has none', () => {
+  const old = listing();
+  delete old.note;
+  expect(draftFromPage(page(), old).listing.note).toBeNull();
+});

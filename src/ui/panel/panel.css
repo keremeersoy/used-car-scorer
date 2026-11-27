@@ -544,3 +544,18 @@ button[data-action="no-record"] {
   font-weight: 600;
   font-size: 12px;
 }
+
+.note-field {
+  display: block;
+}
+.saved-note {
+  display: -webkit-box;
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}

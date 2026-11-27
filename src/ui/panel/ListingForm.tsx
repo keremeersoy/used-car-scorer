@@ -248,6 +248,22 @@ export function ListingForm({
       </section>
 
       <section className="card">
+        <label className="note-field">
+          <h3>{fieldLabels.note}</h3>
+          <textarea
+            data-field="note"
+            rows={3}
+            maxLength={2000}
+            placeholder={strings.noteHint}
+            value={listing.note ?? ''}
+            onChange={(event) =>
+              set('note', event.target.value.trim() === '' ? null : event.target.value)
+            }
+          />
+        </label>
+      </section>
+
+      <section className="card">
         <h3>{strings.bodyTitle}</h3>
         <p className="quiet">{strings.bodyHint}</p>
         <div className="body-view">

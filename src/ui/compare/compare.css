@@ -101,3 +101,9 @@ th.best {
 a {
   color: var(--accent);
 }
+
+/* Notes keep their own line breaks. */
+td {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

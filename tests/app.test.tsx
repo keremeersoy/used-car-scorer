@@ -455,3 +455,24 @@ test('a tab closed before it can be looked at is ignored', async () => {
   process.off('unhandledRejection', record);
   expect(rejections).toEqual([]);
 });
+
+const writeNote = async (value: string) => {
+  await act(async () => {
+    const area = find<HTMLTextAreaElement>('[data-field="note"]');
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(area, value);
+    area.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+};
+
+test('a note is saved, survives reading the page again and shows in the saved list', async () => {
+  const fake = fakeChrome([]);
+  await start(fake);
+  await click('[data-action="reread"]');
+  await writeNote('Pazarlık payı var');
+  await click('[data-action="save"]');
+  expect(fake.stored()['7']!.note).toBe('Pazarlık payı var');
+  await click('[data-action="reread"]');
+  expect(find<HTMLTextAreaElement>('[data-field="note"]').value).toBe('Pazarlık payı var');
+  await click('[data-tab="saved"]');
+  expect(find('.saved-note').textContent).toBe('Pazarlık payı var');
+});

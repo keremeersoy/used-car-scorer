@@ -24,6 +24,7 @@ Save listings and compare them side by side. The interface is in Turkish.
 - Shows a plain verdict first, then what to watch, what is unknown and a body diagram.
 - The score updates as you type, and every section explains itself.
 - A missing value is never treated as clean.
+- Keep your own note on each listing.
 - Compare, delete, back up and restore saved listings.
 - All data stays in the browser. No server, no analytics.
 

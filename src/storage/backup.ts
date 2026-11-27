@@ -62,6 +62,7 @@ const fields = (now: Date): Record<keyof Listing, Check> => {
       ),
     description: optionalText,
     referencePrice: optionalNumber,
+    note: (v) => v === undefined || optionalText(v),
     editedFields: (v) => Array.isArray(v) && v.every(text),
   };
 };
