@@ -1,0 +1,71 @@
+import { draftFromPage, draftFromSaved, emptyDraft, type Draft } from '../../draft/draft';
+import type { ExtractResult } from '../../extract/types';
+import type { Listing } from '../../types';
+
+type PageResult = { kind: 'page' } & ExtractResult;
+export type ReadResult = PageResult | { kind: 'notSahibinden' } | { kind: 'noAccess' };
+export type Incoming = PageResult | { kind: 'saved'; listing: Listing };
+export type Notice = 'unreadable' | 'notSahibinden' | 'noAccess' | 'foreignCurrency';
+
+export interface PanelState {
+  draft: Draft | null;
+  /** Waiting because the draft has unsaved edits. Turned into a draft only when shown. */
+  pending: Incoming | null;
+  notices: Notice[];
+  /** Increases whenever the draft is replaced, so the form can start over. */
+  revision: number;
+}
+
+export const initialState: PanelState = { draft: null, pending: null, notices: [], revision: 0 };
+
+const findById = (saved: Listing[], id: string | null) => saved.find((l) => l.id === id);
+
+function show(state: PanelState, incoming: Incoming, saved: Listing[]): PanelState {
+  let draft: Draft;
+  let notices: Notice[] = [];
+  if (incoming.kind === 'saved') {
+    draft = draftFromSaved(findById(saved, incoming.listing.id) ?? incoming.listing);
+  } else if (!incoming.recognised) {
+    draft = emptyDraft(incoming.read.url);
+    notices = ['unreadable', ...incoming.notices];
+  } else {
+    draft = draftFromPage(incoming.read, findById(saved, incoming.read.id));
+    notices = [...incoming.notices];
+  }
+  return { draft, pending: null, notices, revision: state.revision + 1 };
+}
+
+export function receive(
+  state: PanelState,
+  result: ReadResult | Incoming,
+  saved: Listing[],
+): PanelState {
+  if (result.kind === 'notSahibinden' || result.kind === 'noAccess') {
+    return { ...state, notices: [result.kind] };
+  }
+  if (state.draft?.dirty) return { ...state, pending: result, notices: [] };
+  return show(state, result, saved);
+}
+
+export function discardAndReplace(state: PanelState, saved: Listing[]): PanelState {
+  return state.pending ? show(state, state.pending, saved) : state;
+}
+
+export function keepCurrent(state: PanelState): PanelState {
+  return { ...state, pending: null };
+}
+
+/** `saved` already includes the entry that was just written. */
+export function afterSave(state: PanelState, saved: Listing[]): PanelState {
+  if (state.pending) return show(state, state.pending, saved);
+  if (!state.draft) return state;
+  const entry = findById(saved, state.draft.listing.id.trim());
+  const draft = { ...state.draft, dirty: false, savedAt: entry?.savedAt ?? state.draft.savedAt };
+  return { ...state, draft };
+}
+
+/** True when saving would replace an entry this draft was not started from. */
+export function wouldOverwrite(draft: Draft, saved: Listing[]): boolean {
+  const entry = findById(saved, draft.listing.id.trim());
+  return entry !== undefined && entry.savedAt !== draft.savedAt;
+}
