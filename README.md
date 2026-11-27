@@ -12,10 +12,10 @@ Save listings and compare them side by side. The interface is in Turkish.
 > sahibinden.com.
 
 <p>
-  <img src="docs/images/panel.png" alt="Side panel with the score and the fields (made-up data)" width="320">
+  <img src="docs/images/panel.png" alt="Side panel with the verdict, the findings and the body diagram (invented listing)" width="320">
 </p>
 
-![Compare view (made-up data)](docs/images/compare.png)
+![Compare view with two cars side by side (invented listings)](docs/images/compare.png)
 
 ## Features
 
@@ -103,9 +103,10 @@ weekly.
 
 ### Reader tests
 
-Selectors come from listing pages saved by hand into `fixtures/`, which is **never committed**, each
-with a `<name>.expected.json` beside it. When the folder is empty, as in CI, the page tests are
-skipped and the reader counts as unverified.
+`tests/pages/sample-listing.html` is an invented listing that copies only the element structure, so
+the reader is tested in CI too. Selectors come from listing pages saved by hand into `fixtures/`,
+which is **never committed**, each with a `<name>.expected.json` beside it. When that folder is
+empty, as in CI, the tests on real pages are skipped.
 
 Remove seller names, phone numbers and your own account details from saved pages. When the site
 changes, save a new page, write its expected values and fix `src/extract/`. Never fetch pages from
