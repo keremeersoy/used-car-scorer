@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A weekly run finds newly published problems in dependencies even without changes.
+  schedule:
+    - cron: '17 6 * * 1'
 
 permissions:
   contents: read
@@ -25,3 +28,4 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run build
+      - run: npm audit --audit-level=high

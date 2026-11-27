@@ -70,9 +70,11 @@ ilanda istenen fiyatlardır. Tüm sayılar ve kelime listeleri
 ## Geliştirme
 
 ```bash
-npm test
-npm run typecheck
+npm run check
 ```
+
+Testleri, tip kontrolünü, derlemeyi ve bağımlılık taramasını birlikte çalıştırır. GitHub'da her
+gönderimde bunlar ve CodeQL güvenlik analizi çalışır; Dependabot haftalık güncelleme önerir.
 
 | Klasör | İçerik |
 |---|---|

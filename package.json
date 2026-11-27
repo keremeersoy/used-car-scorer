@@ -10,7 +10,8 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "build": "vite build"
+    "build": "vite build",
+    "check": "npm test && npm run typecheck && npm run build && npm audit --audit-level=high"
   },
   "dependencies": {
     "react": "^19.3.1",
