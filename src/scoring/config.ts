@@ -51,7 +51,8 @@ export interface Config {
     partNegation: {
       phrases: string[]; // names of the warnings that are about a car part
       listWords: string[]; // other parts and joiners that may share a negator in a list
-      fillers: string[]; // extra words allowed before an ordinary negator
+      // One of these must stand before an ordinary negator: "airbag yok" alone is unclear.
+      fillers: string[];
       flawless: string[]; // words saying the part is fine
       flawlessFillers: string[];
     };
@@ -130,7 +131,9 @@ export const config: Config = {
     partNegation: {
       phrases: ['airbag', 'şasi'],
       listWords: ['podye', 'direk', 'direkler', 'tavan', 've'],
-      fillers: ['sorun', 'sorunu', 'problem', 'problemi', 'işlem', 'işlemi', 'değişimi'],
+      fillers: [
+        'sorun', 'sorunu', 'problem', 'problemi', 'işlem', 'işlemi', 'değişimi', 'kaydı', 'hasarı',
+      ],
       flawless: ['hatasız', 'hatasızdır', 'sorunsuz', 'sorunsuzdur'],
       flawlessFillers: ['orijinal', 'orjinal', 've'],
     },

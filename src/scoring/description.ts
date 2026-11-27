@@ -37,6 +37,8 @@ function phrasePattern(variants: string[]): RegExp {
 interface Rule {
   negators: Set<string>;
   allows: (word: string) => boolean;
+  /** When set, one of these must come before the negator. */
+  needs?: Set<string>;
 }
 
 const wordsOf = (text: string) => text.split(/[^\p{L}]+/u).filter(Boolean);
@@ -68,6 +70,7 @@ function rulesFor(name: string, cfg: Config['description']): Rule[] {
     {
       negators: allSpellings(negators),
       allows: (word) => plainFillers.has(word) || partFillers.has(word) || isListed(word),
+      needs: partFillers,
     },
     {
       negators: allSpellings(part.flawless),
@@ -76,10 +79,17 @@ function rulesFor(name: string, cfg: Config['description']): Rule[] {
   ];
 }
 
-function isNegated(after: string[], { negators, allows }: Rule, cancellers: Set<string>): boolean {
+function isNegated(
+  after: string[],
+  { negators, allows, needs }: Rule,
+  cancellers: Set<string>,
+): boolean {
   for (const [index, word] of after.entries()) {
     // "hatasız değil" and "yok mu?" clear nothing.
-    if (negators.has(word)) return !cancellers.has(after[index + 1] ?? '');
+    if (negators.has(word)) {
+      if (needs && !after.slice(0, index).some((before) => needs.has(before))) return false;
+      return !cancellers.has(after[index + 1] ?? '');
+    }
     // Any other word means the negator is probably about something else.
     if (!allows(word)) return false;
   }

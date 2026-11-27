@@ -181,6 +181,7 @@ The panel shows which reference was used, and for a median how many listings it 
 
 - Start at 10, subtract 3 for each **distinct** phrase with at least one non-negated match, floor 0 **(call: distinct, not every occurrence)**.
 - Default warnings: "ağır hasar", "pert", "airbag", "şasi", "motor arızalı", "acil". Other spellings belong to one warning and are charged once: "egirbek" and "airbek" for airbag, "şase" for şasi (added by the owner after real pages). Spellings typed without Turkish letters ("sasi", "agir hasar") match too.
+- A part warning followed only by "yok" ("airbag yok") is unclear and counts; it needs a word saying what is absent ("airbag sorunu yok").
 - Warnings joined by "ve", "veya" or "ya da" share one negation, only between bare record or part warnings (never "motor arızalı" or "acil", never "ağır hasarlı ve …"). A negator followed by "değil" or a question particle clears nothing. A list of parts written with commas stays one clause.
 - Every match in a clause is checked; the clause is cleared only if all of them are negated. In a list of parts ("şase podye airbag hatasız") the other part names do not separate a part warning from its negator.
 - Matching is Turkish-locale lowercase and must start at a word boundary that understands Turkish letters. Suffixes are allowed. Without this, "pert" would match inside "ekspertiz".

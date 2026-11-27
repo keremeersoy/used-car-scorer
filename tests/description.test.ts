@@ -76,6 +76,12 @@ test.each<[string, number]>([
   ['Şase, podye, airbag sorunsuz', 10],
   ['Airbag, motor arızalı', 4],
   ['Airbag, boya yok', 7],
+  // "airbag yok" may mean the car has none, so a part needs a word saying what is absent.
+  ['Airbag yok', 7],
+  ['Araçta airbag yoktur', 7],
+  ['Airbag hiç yok', 7],
+  ['Şasi hasarı yok', 10],
+  ['Airbag değişimi yoktur', 10],
   // A shared negation never hides a fact stated about the first warning.
   ['Motor arızalı ve ağır hasar kaydı yoktur', 7],
   ['Ağır hasarlı ve acil değil', 7],
