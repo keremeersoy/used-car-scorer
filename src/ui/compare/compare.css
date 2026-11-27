@@ -1,0 +1,18 @@
+@import '../theme.css';
+
+main { padding: 20px; }
+h1 { font-size: 18px; margin: 0 0 14px; }
+.banner.error { background: var(--warn-bg); color: var(--danger); border-radius: 8px; padding: 8px 12px; }
+.empty, .note { color: var(--muted); }
+.scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+table { border-collapse: separate; border-spacing: 0; width: 100%; }
+th, td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+tbody tr:last-child > * { border-bottom: 0; }
+thead th { min-width: 200px; }
+thead th:first-child, tbody th { position: sticky; left: 0; z-index: 1; min-width: 150px; background: var(--surface); color: var(--muted); font-weight: 500; }
+tbody tr:first-child td { font-size: 22px; font-weight: 700; }
+.best { background: var(--best-bg); }
+.title, .meta, .excluded { display: block; }
+.meta, .excluded { color: var(--muted); font-weight: 400; }
+.excluded { color: var(--warn-text); }
+a { color: var(--accent); }

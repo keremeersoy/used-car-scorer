@@ -45,6 +45,8 @@ export const strings = {
   noDeductions: 'Kesinti yok: boyalı ya da değişen parça ve hasar kaydı yok.',
   noPhrases: 'Uyarı ifadesi bulunmadı.',
   none: 'Yok',
+  noRecord: 'Kayıt yok',
+  incomplete: 'bilgi eksik',
 } as const;
 
 export const fieldLabels = {
@@ -63,6 +65,15 @@ export const fieldLabels = {
   heavyDamage: 'Ağır hasar kaydı',
   damageRecordTL: 'Hasar kaydı / tramer (TL)',
   description: 'Açıklama',
+} as const;
+
+export const compareLabels = {
+  total: 'Puan',
+  kmPerYear: 'Yıllık km',
+  localPaint: 'Lokal boyalı parçalar',
+  painted: 'Boyalı parçalar',
+  replaced: 'Değişen parçalar',
+  warnings: 'Uyarılar',
 } as const;
 
 export const partStatusLabels: Record<PartStatus, string> = {
