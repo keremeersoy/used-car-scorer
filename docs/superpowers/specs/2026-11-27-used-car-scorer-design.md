@@ -30,7 +30,7 @@ A private Chrome extension for comparing used cars on sahibinden.com. The owner 
 ## 3. Constraints
 
 - Manifest V3, TypeScript, Vite, React, Vitest.
-- Permissions are exactly `activeTab`, `scripting`, `storage`, `sidePanel`. No `host_permissions`, `content_scripts`, `web_accessible_resources` or `externally_connectable`.
+- Permissions are exactly `activeTab`, `scripting`, `storage`, `sidePanel`, plus one optional host permission, `https://*.sahibinden.com/*`, for automatic reading (approved by the owner). No `host_permissions`, `content_scripts`, `web_accessible_resources` or `externally_connectable`.
 - `minimum_chrome_version` 116, for `sidePanel.open()` (checked against Chrome's API reference).
 - No remote code, fonts, images or analytics.
 - **Fixed extension id (added later):** the manifest carries a public `key`, so saved listings no longer depend on the folder. Changing it would hide everything saved. No private key exists.
@@ -60,31 +60,21 @@ The icon click is what grants access. According to Chrome's docs the grant lasts
 
 **Unverified assumption:** that the grant from `action.onClicked` lets the side panel page run `executeScript`. The first build step must prove this in a real Chrome. If it fails, stop and tell the owner. Do not add host permissions.
 
+**Automatic reading (added later, approved by the owner).** Off until the owner turns it on in the panel and grants the optional access. While it is on and the panel is open, a listing's detail page is read when it finishes loading in the active tab or when its tab becomes active. Other pages are left alone. Coming back to the listing already shown keeps it, with any typed values; a different listing waits if there are unsaved edits. Turning it off removes the access. This replaces "only on a click" for listing pages only.
+
 ### 5.2 Panel
 
-Two tabs: **İlan** and **Kayıtlılar**.
+Two tabs, **İlan** and **Kayıtlılar**, and the automatic reading switch. A listing is shown answer first (redesigned later at the owner's request):
 
-```
-┌ İlan | Kayıtlılar ───────────────┐
-│ <title>            İlan no: …    │
-│ 83 / 100                         │
-│ ⚠ Hasar kaydı tutarı bilinmiyor  │
-│ Hasar     30/35   ▸ nedenler     │
-│ Fiyat     —       yetersiz veri  │
-│ Km        21/25   ▸              │
-│ Açıklama   7/10   ▸ "…acil…"     │
-│ Referans fiyat [           ] TL  │
-│ ── Alanlar (düzenlenebilir) ──   │
-│ Fiyat, yıl, km, … parçalar       │
-│ [ Kaydet ]                       │
-└──────────────────────────────────┘
-```
+1. The car: title, known facts, price, and the verdict with the score gauge. Verdict thresholds are in the config; heavy damage is always "Riskli".
+2. What to watch (worst first), what is still unknown, good points.
+3. What the owner may have learned from the seller: damage record, heavy damage, reference price.
+4. A top view of the car for part states; choosing a panel changes its state.
+5. All other fields, folded unless something needed is blank.
+6. The score breakdown by section with reasons, and the asking-price note.
+7. **Kaydet** stays at the bottom.
 
-- The score appears as soon as the page is read and updates as fields are edited. There is no separate score button **(call)**. The usual path is icon, then **Kaydet**.
-- Unknown fields are highlighted. Heavy damage is a three-way choice (Evet / Hayır / Bilinmiyor). Damage record: blank means unknown, 0 means "no record".
-- The UI states that prices are asking prices, not sale prices.
-- If the panel has unsaved hand edits and another read arrives, it asks whether to save or discard before replacing them **(call)**. Closing the panel loses an unsaved draft.
-- **Kayıtlılar** lists saved listings (title, price, score), with open-in-panel for editing, delete with a confirmation, selection checkboxes, and **Karşılaştır** (enabled at two or more).
+The score updates as fields are edited. Unknown values are highlighted and never praised. **Kayıtlılar** lists saved listings best first, with verdicts, selection for **Karşılaştır**, delete with confirmation, and backup.
 
 ### 5.3 Compare
 

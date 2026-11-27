@@ -51,6 +51,7 @@ export function Backup({
 
   return (
     <section className="backup">
+      <h3>{strings.backupTitle}</h3>
       <div className="actions">
         <button
           type="button"

@@ -19,7 +19,9 @@ Save listings and compare them side by side. The interface is in Turkish.
 
 ## Features
 
-- Reads the open listing in one click; every field can be corrected by hand.
+- Reads the open listing in one click, or automatically for each listing you visit if you turn that
+  on; every field can be corrected by hand.
+- Shows a plain verdict first, then what to watch, what is unknown and a body diagram.
 - The score updates as you type, and every section explains itself.
 - A missing value is never treated as clean.
 - Compare, delete, back up and restore saved listings.
@@ -28,9 +30,11 @@ Save listings and compare them side by side. The interface is in Turkish.
 ## What it does not do
 
 It does not crawl, open pages on its own, fetch by listing number, get around bot protection or add
-anything to the page. It reads only the page that is already open, only when you click.
+anything to the page. It reads only the page that is already open: when you click, or, if you turn
+on automatic reading, each listing page you look at.
 
-Permissions: `activeTab`, `scripting`, `storage`, `sidePanel`. No site access is requested, and the
+Permissions: `activeTab`, `scripting`, `storage`, `sidePanel`. Access to `sahibinden.com` is
+optional: Chrome asks only when you turn on **Otomatik oku**, and turning it off removes it. The
 content security policy blocks all network requests from the extension.
 
 ## Install
@@ -60,8 +64,8 @@ Restore the file in the new version.
 3. Click **Kaydet** (save).
 4. On the **Kayıtlılar** (saved) tab, select two or more listings and click **Karşılaştır** (compare).
 
-**Tekrar oku** (read again) reads another listing opened in the same tab. A new tab needs the icon
-again.
+With **Otomatik oku** on, just browse: each listing appears in the panel. Without it, **Tekrar oku**
+(read again) reads another listing opened in the same tab, and a new tab needs the icon again.
 
 ## Scoring
 

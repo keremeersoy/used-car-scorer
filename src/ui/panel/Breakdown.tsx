@@ -1,55 +1,26 @@
 import type { ScoreResult, SectionKey } from '../../scoring/types';
-import {
-  fieldLabels,
-  formatNumber,
-  reasonText,
-  sectionLabels,
-  strings,
-  warningText,
-} from '../strings';
+import { formatNumber, reasonText, sectionLabels, strings, warningText } from '../strings';
 
 const ORDER: SectionKey[] = ['damage', 'price', 'km', 'description'];
-const missingLabels = { price: sectionLabels.price, km: fieldLabels.km, year: fieldLabels.year };
 
-export function ScoreCard({
+/** Where the score comes from, one bar per section with its reasons underneath. */
+export function Breakdown({
   result,
   partLabel,
 }: {
   result: ScoreResult;
   partLabel: (key: string) => string;
 }) {
-  // Heavy damage goes first because it outweighs everything else.
-  const warnings = [...result.warnings].sort(
-    (a, b) => Number(b === 'heavyDamage') - Number(a === 'heavyDamage'),
-  );
-
   return (
     <section className="card">
-      {result.total === null ? (
-        <p className="no-total" data-testid="total">
-          {strings.missingForTotal} {result.missing.map((f) => missingLabels[f]).join(', ')}
-        </p>
-      ) : (
-        <p className="total" data-testid="total">
-          <strong>{result.total}</strong> / 100
-        </p>
-      )}
-
-      {warnings.length > 0 && (
-        <ul className="warnings">
-          {warnings.map((warning) => (
-            <li key={warning} className={warning === 'heavyDamage' ? 'severe' : undefined}>
-              {warningText(warning)}
-            </li>
-          ))}
-        </ul>
-      )}
-
+      <h3>{strings.breakdownTitle}</h3>
+      <p className="quiet">{strings.breakdownHint}</p>
       {ORDER.map((key) => {
         const section = result.sections[key];
         const insufficient = section.warnings.includes('noReference');
+        const empty = section.reasons.length === 0 && section.warnings.length === 0;
         return (
-          <details key={key}>
+          <details key={key} className="score-section">
             <summary>
               <span>{sectionLabels[key]}</span>
               <span className="points">
@@ -59,6 +30,7 @@ export function ScoreCard({
                     : '—'
                   : `${formatNumber(section.points)} / ${section.max}`}
               </span>
+              <progress max={section.max} value={section.points ?? 0} />
             </summary>
             <ul>
               {section.reasons.map((reason, index) => (
@@ -67,7 +39,7 @@ export function ScoreCard({
               ))}
               {section.reasons.length === 0 &&
                 section.warnings.map((warning) => <li key={warning}>{warningText(warning)}</li>)}
-              {section.reasons.length === 0 && section.warnings.length === 0 && (
+              {empty && (
                 // Full marks still need a reason.
                 <li>
                   {key === 'damage'
@@ -81,7 +53,6 @@ export function ScoreCard({
           </details>
         );
       })}
-
       <p className="note">{strings.askingPrice}</p>
     </section>
   );

@@ -9,9 +9,12 @@ import { config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
 import { ConflictError } from '../../storage/listings';
 import type { Listing } from '../../types';
+import { CarDiagram } from '../CarDiagram';
 import { noticeText, strings } from '../strings';
 import { useListings } from '../useListings';
 import { Backup } from './Backup';
+import { Breakdown } from './Breakdown';
+import { findings, missingInfo, verdict } from './insights';
 import { ListingForm } from './ListingForm';
 import {
   afterSave,
@@ -21,11 +24,13 @@ import {
   keepCurrent,
   type ReadResult,
   receive,
+  receiveAuto,
   savedWhileEditing,
 } from './panelState';
 import { ReplacePrompt } from './ReplacePrompt';
 import { SavedList } from './SavedList';
-import { ScoreCard } from './ScoreCard';
+import { Findings, Summary } from './Summary';
+import { useAutoRead } from './useAutoRead';
 
 type Conflict = { replacing: Listing | null };
 
@@ -54,19 +59,22 @@ export function App() {
   const begin = useRef(createSequence()).current;
 
   const read = useCallback(
-    async (tabId: number) => {
+    async (tabId: number, how: typeof receive | typeof receiveAuto = receive) => {
       const isCurrent = begin();
       const result = toResult(await readTab(tabId, chromeTabApi));
       // Read the saved data now, so typed values are merged even right after the panel opens.
       const saved = (await load()) ?? [];
       if (!isCurrent()) return;
-      setState((current) => receive(current, result, saved));
+      setState((current) => how(current, result, saved));
       setTab('listing');
     },
     [begin, load],
   );
+  const autoRead = useAutoRead(
+    useCallback((tabId: number) => void read(tabId, receiveAuto), [read]),
+  );
 
-  // A page is read only after a click: the toolbar icon (a request) or "Tekrar oku".
+  // Without automatic reading, a page is read only after a click: the icon or "Tekrar oku".
   useEffect(() => {
     let windowId: number | undefined;
     const take = async () => {
@@ -131,26 +139,39 @@ export function App() {
     setState((current) => (current.draft ? { ...current, draft: apply(current.draft) } : current));
 
   const justSaved = draft !== null && !draft.dirty && savedRevision === state.revision;
+  const result = draft && scoreListing(draft.listing, listings, new Date());
 
   return (
     <main>
       <header>
-        <nav>
-          {(['listing', 'saved'] as const).map((name) => (
-            <button
-              key={name}
-              type="button"
-              data-tab={name}
-              aria-current={tab === name ? 'page' : undefined}
-              onClick={() => setTab(name)}
-            >
-              {name === 'listing' ? strings.tabListing : `${strings.tabSaved} (${listings.length})`}
-            </button>
-          ))}
-        </nav>
-        <button type="button" data-action="reread" onClick={() => void reread()}>
-          {strings.reread}
-        </button>
+        <div className="top">
+          <nav>
+            {(['listing', 'saved'] as const).map((name) => (
+              <button
+                key={name}
+                type="button"
+                data-tab={name}
+                aria-current={tab === name ? 'page' : undefined}
+                onClick={() => setTab(name)}
+              >
+                {name === 'listing' ? strings.tabListing : strings.tabSaved}
+                {name === 'saved' && <span className="count">{listings.length}</span>}
+              </button>
+            ))}
+          </nav>
+          <button
+            type="button"
+            className="switch"
+            role="switch"
+            aria-checked={autoRead.enabled}
+            data-action="auto-read"
+            title={autoRead.enabled ? strings.autoReadOnHint : strings.autoReadConsent}
+            onClick={autoRead.toggle}
+          >
+            <span className="knob" aria-hidden="true" />
+            {strings.autoRead}
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -179,15 +200,12 @@ export function App() {
             onStay={() => setState(keepCurrent)}
           />
         )}
-        {draft ? (
+        {draft && result ? (
           <>
-            <p className="listing-heading">
-              <strong>{draft.listing.title ?? strings.untitled}</strong>
-              {draft.listing.id && <span>#{draft.listing.id}</span>}
-            </p>
-            <ScoreCard
-              result={scoreListing(draft.listing, listings, new Date())}
-              partLabel={partLabel}
+            <Summary listing={draft.listing} result={result} level={verdict(result, config)} />
+            <Findings
+              findings={findings(draft.listing, result, partLabel, config)}
+              missing={missingInfo(draft.listing, config)}
             />
             <ListingForm
               key={state.revision}
@@ -195,6 +213,15 @@ export function App() {
               onChange={change}
               onValidity={setFormValid}
             />
+            <Breakdown result={result} partLabel={partLabel} />
+            <button
+              type="button"
+              className="link reread"
+              data-action="reread"
+              onClick={() => void reread()}
+            >
+              {strings.reread}
+            </button>
             <div className="footer">
               {conflict ? (
                 <div className="actions">
@@ -228,7 +255,27 @@ export function App() {
             </div>
           </>
         ) : (
-          <p className="empty">{strings.clickIconToRead}</p>
+          <section className="empty">
+            <CarDiagram parts={{}} />
+            <h1>{strings.emptyTitle}</h1>
+            <p>{autoRead.enabled ? strings.emptyAuto : strings.emptyManual}</p>
+            {!autoRead.enabled && (
+              <>
+                <button type="button" className="primary" onClick={autoRead.toggle}>
+                  {strings.autoReadEnable}
+                </button>
+                <small>{strings.autoReadConsent}</small>
+              </>
+            )}
+            <button
+              type="button"
+              className="link"
+              data-action="reread"
+              onClick={() => void reread()}
+            >
+              {strings.readThisTab}
+            </button>
+          </section>
         )}
       </div>
 

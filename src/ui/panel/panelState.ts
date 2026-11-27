@@ -47,6 +47,20 @@ export function receive(
   return show(state, result, saved);
 }
 
+/**
+ * A listing read because the owner browsed to it. Other pages change nothing, and coming back to
+ * the listing already shown keeps it, typed values included.
+ */
+export function receiveAuto(state: PanelState, result: ReadResult, saved: Listing[]): PanelState {
+  if (result.kind !== 'page' || !result.recognised) return state;
+  const { draft } = state;
+  const shown = draft !== null && draft.listing.id === result.read.id;
+  if (shown && (draft.dirty || draft.fromPage)) {
+    return state.pending ? { ...state, pending: null } : state;
+  }
+  return receive(state, result, saved);
+}
+
 export function discardAndReplace(state: PanelState, saved: Listing[]): PanelState {
   return state.pending ? show(state, state.pending, saved) : state;
 }

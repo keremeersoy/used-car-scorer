@@ -43,8 +43,9 @@ including error messages.
 
 - The design is `docs/superpowers/specs/`. Scoring numbers and word lists live in
   `src/scoring/config.ts`.
-- Read only the page already open, only on a click. No crawling, no background requests, nothing
-  added to the page, no data leaving the browser.
+- Read only the page already open: on a click, or, after the owner turns automatic reading on, a
+  sahibinden listing page they are looking at. No crawling, no background requests, nothing added
+  to the page, no data leaving the browser.
 - Selectors come only from pages the owner saved by hand into `fixtures/` (never committed).
   Never fetch the site.
 - A missing value is unknown, never clean.

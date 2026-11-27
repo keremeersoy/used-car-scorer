@@ -7,6 +7,8 @@ export interface PartDef {
 }
 
 export interface Config {
+  /** The plain-language verdict: at or above `good`, at or above `careful`, otherwise risky. */
+  verdict: { good: number; careful: number };
   weights: Record<SectionKey, number>;
   damage: {
     penalty: Record<'localPaint' | 'painted' | 'replaced', number>;
@@ -60,6 +62,7 @@ export interface Config {
 }
 
 export const config: Config = {
+  verdict: { good: 75, careful: 55 },
   weights: { damage: 35, price: 30, km: 25, description: 10 },
   damage: {
     penalty: { localPaint: 1, painted: 3, replaced: 6 },

@@ -54,3 +54,12 @@ test('blank values show a dash and a stated empty record says so', () => {
   expect(cells('Yakıt')).toEqual(['—', 'Benzin']);
   expect(cells('Hasar kaydı / tramer (TL)')).toEqual(['—', 'Kayıt yok']);
 });
+
+test('each row marks its best car: higher points, lower price and km', () => {
+  const cars = [listing({ id: 'a', price: 900_000, km: 90_000 }), listing({ id: 'b', km: 20_000 })];
+  const { rows } = buildComparison(['a', 'b'], cars, NOW, testCfg);
+  const best = (label: string) => rows.find((row) => row.label === label)!.best;
+  expect(best('Fiyat (TL)')).toEqual([true, false]);
+  expect(best('Km')).toEqual([false, true]);
+  expect(best('Yakıt')).toEqual([false, false]);
+});

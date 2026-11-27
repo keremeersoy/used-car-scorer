@@ -1,30 +1,58 @@
+/*
+ * An inspection report for a used car: calm paper and ink, a road-signage typeface, and colour
+ * kept for what it means (paint states and the verdict).
+ */
 :root {
   color-scheme: light dark;
-  --bg: #f5f6f8;
+  --bg: #eef1f5;
   --surface: #ffffff;
-  --text: #17191d;
-  --muted: #5d6471;
-  --border: #d9dde3;
-  --accent: #1f5fd1;
+  --sunken: #f4f6f9;
+  --text: #16202e;
+  --muted: #566274;
+  --border: #d7dde6;
+  --accent: #1c4f9c;
   --accent-text: #ffffff;
-  --danger: #b3261e;
-  --warn-bg: #fff4d6;
-  --warn-text: #6b4a00;
-  --best-bg: #e3f3e6;
+  --good: #1d7a4f;
+  --careful: #9a6200;
+  --risky: #b3261e;
+  --incomplete: #566274;
+  --good-bg: #e2f2e9;
+  --warn-bg: #fdf0d2;
+  --warn-text: #6a4400;
+  --bad-bg: #fbe4e2;
+  --panel-original: #e3e8ee;
+  --panel-local: #f4d35e;
+  --panel-painted: #ee8b34;
+  --panel-replaced: #cf3a34;
+  --panel-unknown: #ffffff;
+  --glass: #b9cbe0;
+  --wheel: #37404d;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #16181c;
-    --surface: #1f2228;
-    --text: #e8eaed;
-    --muted: #9aa2af;
-    --border: #353a43;
-    --accent: #7aa7f7;
-    --accent-text: #10131a;
-    --danger: #ff8a80;
-    --warn-bg: #3b3016;
-    --warn-text: #ffd978;
-    --best-bg: #1e3a26;
+    --bg: #131922;
+    --surface: #1c2430;
+    --sunken: #161d27;
+    --text: #e9eef5;
+    --muted: #a3b0c2;
+    --border: #323d4d;
+    --accent: #8db6f5;
+    --accent-text: #0e1b30;
+    --good: #66d19e;
+    --careful: #f0b84a;
+    --risky: #ff8f85;
+    --incomplete: #a3b0c2;
+    --good-bg: #16362a;
+    --warn-bg: #3a2e12;
+    --warn-text: #ffd57a;
+    --bad-bg: #43211f;
+    --panel-original: #3a4657;
+    --panel-local: #c9a82f;
+    --panel-painted: #d0741f;
+    --panel-replaced: #b8322d;
+    --panel-unknown: #1c2430;
+    --glass: #45607f;
+    --wheel: #0b0f15;
   }
 }
 * {
@@ -35,12 +63,33 @@ body {
   background: var(--bg);
   color: var(--text);
   font:
-    13px / 1.45 system-ui,
+    14px / 1.45 Barlow,
+    system-ui,
     sans-serif;
 }
 [hidden] {
   /* biome-ignore lint/complexity/noImportantStyles: hidden must beat any display rule */
   display: none !important;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+h3 {
+  font-size: 15px;
+  font-weight: 700;
 }
 button,
 input,
@@ -50,14 +99,16 @@ textarea {
   color: inherit;
 }
 button {
-  padding: 5px 10px;
+  min-height: 32px;
+  padding: 5px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--surface);
+  font-weight: 500;
   cursor: pointer;
 }
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: default;
 }
 button.primary {
@@ -67,10 +118,11 @@ button.primary {
   font-weight: 600;
 }
 button.danger {
-  border-color: var(--danger);
-  color: var(--danger);
+  border-color: var(--risky);
+  color: var(--risky);
 }
 button.link {
+  min-height: 0;
   border: 0;
   padding: 0;
   background: none;
@@ -79,5 +131,104 @@ button.link {
 }
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
+}
+
+/* Score gauge */
+.ring {
+  width: 84px;
+  height: 84px;
+  flex: none;
+}
+.ring circle {
+  fill: none;
+  stroke-width: 10;
+}
+.ring .track {
+  stroke: var(--border);
+}
+.ring .value {
+  stroke: currentColor;
+  stroke-linecap: round;
+}
+.ring text {
+  fill: var(--text);
+  font-size: 32px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.ring.good {
+  color: var(--good);
+}
+.ring.careful {
+  color: var(--careful);
+}
+.ring.risky {
+  color: var(--risky);
+}
+.ring.incomplete {
+  color: var(--incomplete);
+}
+
+/* Car body */
+.car {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+}
+.car .wheel {
+  fill: var(--wheel);
+}
+.car .glass {
+  fill: var(--glass);
+}
+.car .panel rect {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+.car .original rect {
+  fill: var(--panel-original);
+}
+.car .localPaint rect {
+  fill: var(--panel-local);
+}
+.car .painted rect {
+  fill: var(--panel-painted);
+}
+.car .replaced rect {
+  fill: var(--panel-replaced);
+}
+.car .unknown rect:first-of-type {
+  fill: var(--panel-unknown);
+  stroke-dasharray: 4 3;
+}
+.car .hatch {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.car text {
+  fill: #16202e;
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.car .replaced text {
+  fill: #ffffff;
+}
+.car .unknown text {
+  fill: var(--muted);
+}
+.car.editable .panel {
+  cursor: pointer;
+  outline: none;
+}
+.car.editable .panel:hover rect,
+.car.editable .panel:focus-visible rect,
+.car .panel.selected rect {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-dasharray: none;
 }

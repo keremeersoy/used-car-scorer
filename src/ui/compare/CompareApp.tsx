@@ -1,5 +1,7 @@
 import { isSahibindenUrl } from '../../read/readTab';
-import { sectionLabels, strings } from '../strings';
+import { CarDiagram } from '../CarDiagram';
+import { ScoreRing } from '../ScoreRing';
+import { sectionLabels, strings, verdictText } from '../strings';
 import { useListings } from '../useListings';
 import { buildComparison } from './rows';
 import { parseIds } from './url';
@@ -36,6 +38,8 @@ export function CompareApp() {
                 <th />
                 {columns.map((column, index) => (
                   <th key={column.id} scope="col" className={best(index)}>
+                    <ScoreRing score={column.total} level={column.level} />
+                    <span className="verdict-name">{verdictText[column.level].title}</span>
                     <span className="title">{column.title}</span>
                     <span className="meta">
                       #{column.id}
@@ -54,6 +58,7 @@ export function CompareApp() {
                         {column.excluded.map((key) => sectionLabels[key]).join(', ')}
                       </span>
                     )}
+                    <CarDiagram parts={column.parts} />
                   </th>
                 ))}
               </tr>
@@ -63,7 +68,7 @@ export function CompareApp() {
                 <tr key={row.label}>
                   <th scope="row">{row.label}</th>
                   {row.cells.map((cell, index) => (
-                    <td key={columns[index]!.id} className={best(index)}>
+                    <td key={columns[index]!.id} className={row.best[index] ? 'best' : undefined}>
                       {cell}
                     </td>
                   ))}

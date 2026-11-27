@@ -8,7 +8,6 @@ test('manifest asks for exactly the agreed access', () => {
   for (const key of [
     'host_permissions',
     'optional_permissions',
-    'optional_host_permissions',
     'content_scripts',
     'web_accessible_resources',
     'externally_connectable',
@@ -41,4 +40,9 @@ test('a fixed public key keeps the extension id, and the saved listings, across 
     .map((digit) => String.fromCharCode(97 + parseInt(digit, 16)))
     .join('');
   expect(id).toBe('lnlcddeibdpccfdocfclbpclhacleoph');
+});
+
+// Granted only if the owner turns automatic reading on, and for this one site only.
+test('the only optional access is sahibinden.com over https', () => {
+  expect(manifest.optional_host_permissions).toEqual(['https://*.sahibinden.com/*']);
 });

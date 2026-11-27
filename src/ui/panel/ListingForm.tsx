@@ -9,6 +9,7 @@ import {
 } from '../../draft/draft';
 import { config } from '../../scoring/config';
 import type { PartStatus } from '../../types';
+import { CarDiagram, STATUS_MARKS } from '../CarDiagram';
 import { type ParsedNumber, parsePrice, parseWholeNumber, parseYear } from '../parse';
 import {
   fieldLabels,
@@ -130,6 +131,13 @@ export function ListingForm({
 
   useEffect(() => onValidity(invalid.size === 0), [invalid, onValidity]);
 
+  const [selected, setSelected] = useState<string | null>(null);
+  // Open from the start when something needed for a score or a save is blank.
+  const [open, setOpen] = useState(
+    () =>
+      listing.id === '' || listing.price === null || listing.year === null || listing.km === null,
+  );
+
   const mark = (name: string, valid: boolean) =>
     setInvalid((previous) => {
       if (valid === !previous.has(name)) return previous;
@@ -185,99 +193,143 @@ export function ListingForm({
 
   const heavy = listing.heavyDamage === null ? 'unknown' : listing.heavyDamage ? 'yes' : 'no';
 
-  return (
-    <section className="card">
-      {numberRow('referencePrice')}
-      <h2>{strings.fields}</h2>
-      {textRow('id')}
-      {textRow('title')}
-      {numberRow('price')}
-      <div className="grid">
-        {numberRow('year')}
-        {numberRow('km')}
-        {textRow('brand')}
-        {textRow('series')}
-        {textRow('model')}
-        {textRow('engine')}
-        {textRow('fuel')}
-        {textRow('gearbox')}
-      </div>
-      <Row
-        label={fieldLabels.heavyDamage}
-        name="heavyDamage"
-        draft={draft}
-        current={listing.heavyDamage}
-        onTake={take}
-      >
-        <select
-          data-field="heavyDamage"
-          className={heavy === 'unknown' ? 'unknown' : undefined}
-          value={heavy}
-          onChange={(event) =>
-            set(
-              'heavyDamage',
-              event.target.value === 'unknown' ? null : event.target.value === 'yes',
-            )
-          }
-        >
-          {(['unknown', 'yes', 'no'] as const).map((option) => (
-            <option key={option} value={option}>
-              {heavyDamageLabels[option]}
-            </option>
-          ))}
-        </select>
-      </Row>
-      {numberRow('damageRecordTL', strings.damageRecordHint)}
+  const status = selected ? (listing.parts[selected] ?? 'unknown') : null;
+  const selectedPart = config.damage.parts.find((part) => part.key === selected);
+  const changedParts = config.damage.parts.filter(
+    ({ key }) => draft.pageValues[`parts.${key}`] !== undefined,
+  );
 
-      <h2>{strings.parts}</h2>
-      <div className="grid">
-        {config.damage.parts.map(({ key, label }) => {
-          const status = listing.parts[key] ?? 'unknown';
-          return (
-            <Row
-              key={key}
-              label={label}
-              name={`parts.${key}`}
-              draft={draft}
-              current={status}
-              onTake={take}
-            >
-              <select
-                data-field={`parts.${key}`}
-                className={status === 'unknown' ? 'unknown' : undefined}
-                value={status}
-                onChange={(event) =>
-                  onChange((current) => editPart(current, key, event.target.value as PartStatus))
+  return (
+    <>
+      <section className="card">
+        <h3>{strings.extraTitle}</h3>
+        <p className="quiet">{strings.extraHint}</p>
+        {numberRow('damageRecordTL', strings.damageRecordHint)}
+        {listing.damageRecordTL === null && (
+          <button
+            type="button"
+            className="link"
+            data-action="no-record"
+            onClick={() => {
+              setGeneration((g) => ({ ...g, damageRecordTL: (g.damageRecordTL ?? 0) + 1 }));
+              mark('damageRecordTL', true);
+              set('damageRecordTL', 0);
+            }}
+          >
+            {strings.noRecordAction}
+          </button>
+        )}
+        <Row
+          label={fieldLabels.heavyDamage}
+          name="heavyDamage"
+          draft={draft}
+          current={listing.heavyDamage}
+          onTake={take}
+        >
+          <select
+            data-field="heavyDamage"
+            className={heavy === 'unknown' ? 'unknown' : undefined}
+            value={heavy}
+            onChange={(event) =>
+              set(
+                'heavyDamage',
+                event.target.value === 'unknown' ? null : event.target.value === 'yes',
+              )
+            }
+          >
+            {(['unknown', 'yes', 'no'] as const).map((option) => (
+              <option key={option} value={option}>
+                {heavyDamageLabels[option]}
+              </option>
+            ))}
+          </select>
+        </Row>
+        {numberRow('referencePrice', strings.referenceHint)}
+      </section>
+
+      <section className="card">
+        <h3>{strings.bodyTitle}</h3>
+        <p className="quiet">{strings.bodyHint}</p>
+        <div className="body-view">
+          <CarDiagram parts={listing.parts} selected={selected} onSelect={setSelected} />
+          <ul className="legend">
+            {Object.entries(partStatusLabels).map(([value, text]) => (
+              <li key={value} className={value}>
+                <span className="swatch">{STATUS_MARKS[value as PartStatus]}</span>
+                {text}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {selectedPart && status && (
+          <fieldset className="picker">
+            <legend>{selectedPart.label}</legend>
+            {Object.entries(partStatusLabels).map(([value, text]) => (
+              <button
+                key={value}
+                type="button"
+                data-status={value}
+                aria-pressed={status === value}
+                onClick={() =>
+                  onChange((current) => editPart(current, selectedPart.key, value as PartStatus))
                 }
               >
-                {Object.entries(partStatusLabels).map(([value, text]) => (
-                  <option key={value} value={value}>
-                    {text}
-                  </option>
-                ))}
-              </select>
-            </Row>
+                {text}
+              </button>
+            ))}
+          </fieldset>
+        )}
+        {changedParts.map(({ key, label }) => {
+          const pageValue = draft.pageValues[`parts.${key}`];
+          if (pageValue === (listing.parts[key] ?? 'unknown')) return null;
+          return (
+            <small key={key} className="page-value">
+              {label}. {strings.pageSays} {partStatusLabels[pageValue as PartStatus]}{' '}
+              <button type="button" className="link" onClick={() => take(`parts.${key}`)}>
+                {strings.usePage}
+              </button>
+            </small>
           );
         })}
-      </div>
+      </section>
 
-      <Row
-        label={fieldLabels.description}
-        name="description"
-        draft={draft}
-        current={listing.description}
-        onTake={take}
+      <details
+        className="card all-fields"
+        open={open}
+        onToggle={(event) => setOpen(event.currentTarget.open)}
       >
-        <textarea
-          data-field="description"
-          rows={5}
-          className={listing.description ? undefined : 'unknown'}
-          value={listing.description ?? ''}
-          onChange={(event) =>
-            set('description', event.target.value.trim() === '' ? null : event.target.value)
-          }
-        />
-      </Row>
-    </section>
+        <summary>{strings.allFields}</summary>
+        {textRow('id')}
+        {textRow('title')}
+        {numberRow('price')}
+        <div className="grid">
+          {numberRow('year')}
+          {numberRow('km')}
+          {textRow('brand')}
+          {textRow('series')}
+          {textRow('model')}
+          {textRow('engine')}
+          {textRow('fuel')}
+          {textRow('gearbox')}
+        </div>
+        <Row
+          label={fieldLabels.description}
+          name="description"
+          draft={draft}
+          current={listing.description}
+          onTake={take}
+        >
+          <textarea
+            data-field="description"
+            rows={5}
+            className={listing.description ? undefined : 'unknown'}
+            value={listing.description ?? ''}
+            onChange={(event) =>
+              set('description', event.target.value.trim() === '' ? null : event.target.value)
+            }
+          />
+        </Row>
+      </details>
+    </>
   );
 }

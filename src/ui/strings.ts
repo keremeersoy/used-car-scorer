@@ -7,6 +7,31 @@ import type { Notice } from './panel/panelState';
 
 export const strings = {
   tabListing: 'İlan',
+  autoRead: 'Otomatik oku',
+  autoReadEnable: 'Otomatik okumayı aç',
+  autoReadOnHint: 'Açtığın ilanlar kendiliğinden okunuyor. Kapatmak için tıkla.',
+  heavyNote: 'Ağır hasar kayıtlı.',
+  referenceHint: 'Benzer arabaların fiyatı. Boşsa kayıtlı benzer ilanlardan hesaplanır.',
+  autoReadConsent: 'Chrome sahibinden.com için izin soracak. İstediğin zaman kapatabilirsin.',
+  emptyTitle: 'Bir ilan sayfası aç',
+  emptyManual: 'Sonra Chrome araç çubuğundaki eklenti simgesine tıkla.',
+  emptyAuto: 'Açtığın ilan burada kendiliğinden puanlanacak.',
+  watchOut: 'Dikkat etmen gerekenler',
+  nothingToWatch: 'Dikkat çeken bir sorun bulunmadı.',
+  goodSides: 'İyi yanları',
+  missingTitle: 'Henüz bilinmiyor',
+  extraTitle: 'Satıcıdan öğrendiklerin',
+  extraHint: 'İlanda yazmayan bilgileri ekle, puan hemen güncellensin.',
+  bodyTitle: 'Kaporta',
+  bodyHint: 'Durumunu değiştirmek için bir parçayı seç.',
+  breakdownTitle: 'Puan dökümü',
+  breakdownHint: 'Nedenlerini görmek için bir satırı aç.',
+  readThisTab: 'Açık sekmeyi oku',
+  allFields: 'Tüm ilan bilgileri',
+  noRecordAction: 'Kayıt yok',
+  select: 'Karşılaştırmaya ekle',
+  chooseTwo: 'Karşılaştırmak için en az iki ilan seç.',
+  backupTitle: 'Yedekleme',
   tabSaved: 'Kayıtlılar',
   save: 'Kaydet',
   saved: 'Kaydedildi',
@@ -76,6 +101,7 @@ export const fieldLabels = {
 
 export const compareLabels = {
   total: 'Puan',
+  section: (name: string) => `${name} puanı`,
   kmPerYear: 'Yıllık km',
   localPaint: 'Lokal boyalı parçalar',
   painted: 'Boyalı parçalar',
@@ -201,4 +227,56 @@ export function warningText(warning: Warning): string {
     case 'noReference':
       return `Fiyat için ${strings.insufficient}`;
   }
+}
+
+export const verdictText = {
+  good: { title: 'İyi aday', note: 'Belirgin bir sorun görünmüyor.' },
+  careful: { title: 'Dikkatli bak', note: 'Almadan önce aşağıdakileri kontrol et.' },
+  risky: { title: 'Riskli', note: 'Ciddi sorunlar var.' },
+  incomplete: { title: 'Bilgi eksik', note: 'Fiyat, yıl ve km girilince puan çıkar.' },
+} as const;
+
+const counted = (count: number, what: string, names: string) =>
+  count === 1
+    ? `${what.charAt(0).toLocaleUpperCase('tr-TR')}${what.slice(1)} parça: ${names}`
+    : `${count} ${what} parça: ${names}`;
+
+export const findingText = {
+  heavyDamage: 'Ağır hasar kaydı var',
+  replaced: (names: string[]) => counted(names.length, 'değişen', names.join(', ')),
+  painted: (names: string[]) => counted(names.length, 'boyalı', names.join(', ')),
+  localPaint: (names: string[]) => counted(names.length, 'lokal boyalı', names.join(', ')),
+  record: (amount: number) => `Hasar kaydı (tramer): ${formatMoney(amount)}`,
+  veryCheap: (percent: number) =>
+    `Referanstan %${formatNumber(percent, 0)} ucuz: nedenini satıcıya sor`,
+  cheap: (percent: number) => `İyi fiyat: referanstan %${formatNumber(percent, 0)} ucuz`,
+  expensive: (percent: number) => `Referanstan %${formatNumber(percent, 0)} pahalı`,
+  kmVeryHigh: (perYear: number) => `Km çok yüksek: yılda ${formatNumber(perYear, 0)} km`,
+  kmHigh: (perYear: number) => `Km yüksek: yılda ${formatNumber(perYear, 0)} km`,
+  kmLow: (perYear: number) => `Km düşük: yılda ${formatNumber(perYear, 0)} km`,
+  kmSuspicious: 'Km yaşına göre çok düşük: doğrula',
+  phrase: (phrase: string) => `Açıklamada “${phrase}” geçiyor`,
+  noParts: 'Boyalı veya değişen parça yok',
+  noHeavyDamage: 'Ağır hasar kaydı yok',
+  noRecord: 'Hasar kaydı yok',
+};
+
+export const missingText = {
+  price: 'Fiyat',
+  year: 'Yıl',
+  km: 'Km',
+  parts: (count: number) => `${count} parçanın boya durumu`,
+  record: 'Hasar kaydı (tramer) tutarı',
+  heavyDamage: 'Ağır hasar kaydı durumu',
+  description: 'Açıklama',
+};
+
+/** The facts shown under a title: only the ones that are known. */
+export function factList(car: Pick<Listing, 'year' | 'km' | 'fuel' | 'gearbox'>): string[] {
+  return [
+    car.year === null ? null : `${car.year} model`,
+    car.km === null ? null : `${formatNumber(car.km, 0)} km`,
+    car.fuel,
+    car.gearbox,
+  ].filter((fact): fact is string => Boolean(fact));
 }
