@@ -37,13 +37,15 @@ export interface Config {
   };
   description: {
     penalty: number;
-    phrases: string[];
+    /** One entry per warning: its name, then other spellings. Each warning is charged once. */
+    phrases: string[][];
     /** A negator clears a phrase only if every word between them is a filler. */
     negators: string[];
     fillers: string[];
     /** Extra negations that are only safe after a phrase naming a car part. */
     partNegation: {
-      phrases: string[];
+      phrases: string[]; // names of the warnings that are about a car part
+      listWords: string[]; // other parts and joiners that may share a negator in a list
       fillers: string[]; // extra words allowed before an ordinary negator
       flawless: string[]; // words saying the part is fine
       flawlessFillers: string[];
@@ -102,15 +104,23 @@ export const config: Config = {
   },
   description: {
     penalty: 3,
-    // 'egirbek' and 'airbek' are how some sellers spell airbag.
-    phrases: ['ağır hasar', 'pert', 'airbag', 'egirbek', 'airbek', 'şasi', 'motor arızalı', 'acil'],
+    // Spellings without Turkish letters ('sasi', 'agir hasar') are matched automatically.
+    phrases: [
+      ['ağır hasar'],
+      ['pert'],
+      ['airbag', 'egirbek', 'airbek'],
+      ['şasi', 'şase'],
+      ['motor arızalı'],
+      ['acil'],
+    ],
     negators: ['yok', 'yoktur', 'değil', 'değildir', 'bulunmamaktadır', 'bulunmuyor'],
     fillers: [
       'kayıt', 'kaydı', 'kayıtlı', 'durumu', 'hasarı', 'hiç', 'herhangi', 'bir',
       'kesinlikle', 'dahi', 'bile',
     ],
     partNegation: {
-      phrases: ['airbag', 'egirbek', 'airbek', 'şasi'],
+      phrases: ['airbag', 'şasi'],
+      listWords: ['podye', 'direk', 'direkler', 'tavan', 've'],
       fillers: ['sorun', 'sorunu', 'problem', 'problemi', 'işlem', 'işlemi', 'değişimi'],
       flawless: ['hatasız', 'hatasızdır', 'sorunsuz', 'sorunsuzdur'],
       flawlessFillers: ['orijinal', 'orjinal', 've'],

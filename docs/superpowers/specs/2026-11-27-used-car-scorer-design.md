@@ -178,7 +178,8 @@ The panel shows which reference was used, and for a median how many listings it 
 ### 7.4 Description (10)
 
 - Start at 10, subtract 3 for each **distinct** phrase with at least one non-negated match, floor 0 **(call: distinct, not every occurrence)**.
-- Default phrases: "ağır hasar", "pert", "airbag", "egirbek", "airbek", "şasi", "motor arızalı", "acil". ("egirbek" and "airbek" added by the owner after the first real pages.)
+- Default warnings: "ağır hasar", "pert", "airbag", "şasi", "motor arızalı", "acil". Other spellings belong to one warning and are charged once: "egirbek" and "airbek" for airbag, "şase" for şasi (added by the owner after real pages). Spellings typed without Turkish letters ("sasi", "agir hasar") match too.
+- Every match in a clause is checked; the clause is cleared only if all of them are negated. In a list of parts ("şase podye airbag hatasız") the other part names do not separate a part warning from its negator.
 - Matching is Turkish-locale lowercase and must start at a word boundary that understands Turkish letters. Suffixes are allowed. Without this, "pert" would match inside "ekspertiz".
 - Negation: a match is negated only when a negator follows it in the same clause with nothing but filler words in between ("pert kaydı yoktur"), so "pert kayıtlı motor sorunsuz" still counts. Negators: "yok", "yoktur", "değil", "değildir", "bulunmamaktadır", "bulunmuyor". "hatasız" and "sorunsuz" (added by the owner) clear only phrases that name a part (airbag, şasi and the airbag spellings). The word lists are in the config. Clauses end at `. ! ? ; ,` or a line break. **(tightened after the final review)** Unclear cases count against the listing.
 - Every match shows its sentence, negated ones too, marked as not counted.
