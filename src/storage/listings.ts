@@ -32,11 +32,16 @@ export class ConflictError extends Error {
   override name = 'ConflictError';
 }
 
-// The browser does not keep key order, so keys are sorted before comparing.
+// The browser does not keep key order, so keys are sorted before comparing. updatedAt is left out:
+// it says when an entry was written, not what is in it.
 const canonical = (value: unknown) =>
-  JSON.stringify(value, (_, v) =>
-    isObject(v) ? Object.fromEntries(Object.keys(v).sort().map((key) => [key, v[key]])) : v,
-  );
+  JSON.stringify(value, (key, v) => {
+    if (key === 'updatedAt') return undefined;
+    return isObject(v) ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]])) : v;
+  });
+
+/** When the entry last changed. A correction keeps savedAt, so that alone is not enough. */
+const changedAt = (listing: Listing) => Date.parse(listing.updatedAt ?? listing.savedAt);
 
 export interface RestoreResult {
   added: number;
@@ -47,7 +52,11 @@ export interface RestoreResult {
 /** Runs a task while no other holder of the lock runs. */
 export type Lock = <T>(task: () => Promise<T>) => Promise<T>;
 
-export function createListingStore(area: StorageArea, lock: Lock = (task) => task()) {
+export function createListingStore(
+  area: StorageArea,
+  lock: Lock = (task) => task(),
+  now: () => Date = () => new Date(),
+) {
   const read = async (): Promise<Stored> => {
     const raw = (await area.get(STORE_KEY))[STORE_KEY];
     if (raw === undefined) return { version: 1, listings: {} };
@@ -96,7 +105,7 @@ export function createListingStore(area: StorageArea, lock: Lock = (task) => tas
         if (expected && canonical(current) !== canonical(expected.replacing)) {
           throw new ConflictError('The saved entry changed');
         }
-        listings[id] = { ...listing, id };
+        listings[id] = { ...listing, id, updatedAt: now().toISOString() };
       });
     },
     /** Adds entries from a backup. A saved entry is replaced only by a newer one. */
@@ -109,13 +118,13 @@ export function createListingStore(area: StorageArea, lock: Lock = (task) => tas
           const id = entry.id.trim();
           const other = newest.get(id);
           if (other) result.skipped++;
-          if (!other || Date.parse(entry.savedAt) > Date.parse(other.savedAt)) {
+          if (!other || changedAt(entry) > changedAt(other)) {
             newest.set(id, entry);
           }
         }
         for (const [id, entry] of newest) {
           const existing = Object.hasOwn(listings, id) ? listings[id] : undefined;
-          if (existing && !(Date.parse(entry.savedAt) > Date.parse(existing.savedAt))) {
+          if (existing && !(changedAt(entry) > changedAt(existing))) {
             result.skipped++;
             continue;
           }

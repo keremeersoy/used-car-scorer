@@ -22,6 +22,8 @@ export interface Listing extends ListingData {
   id: string; // listing number
   url: string;
   savedAt: string; // ISO date
+  /** Set on every write. Absent on entries saved before it existed. */
+  updatedAt?: string;
   referencePrice: number | null; // entered by hand
   editedFields: string[];
 }

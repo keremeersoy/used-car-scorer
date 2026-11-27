@@ -23,33 +23,40 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const OLDEST_YEAR = 1900;
 
 // Listing every key makes the compiler insist that a new field is checked here too.
-const fields = (now: Date): Record<keyof Listing, Check> => ({
-  id: (v) => typeof v === 'string' && v.trim() !== '' && v.trim() !== '__proto__',
-  url: text,
+const fields = (now: Date): Record<keyof Listing, Check> => {
   // A date in the future would win every later restore and never leave the price median.
-  savedAt: (v) =>
-    typeof v === 'string' && ISO_DATE.test(v) && Date.parse(v) <= now.getTime() + DAY_MS,
-  title: optionalText,
-  price: optionalNumber,
-  brand: optionalText,
-  series: optionalText,
-  model: optionalText,
-  year: (v) =>
-    v === null ||
-    (Number.isInteger(v) && (v as number) >= OLDEST_YEAR && (v as number) <= now.getFullYear() + 1),
-  km: optionalNumber,
-  fuel: optionalText,
-  gearbox: optionalText,
-  engine: optionalText,
-  heavyDamage: (v) => v === null || typeof v === 'boolean',
-  damageRecordTL: optionalNumber,
-  parts: (v) =>
-    isObject(v) &&
-    Object.entries(v).every(([key, status]) => key !== '__proto__' && PART_STATUSES.has(status as PartStatus)),
-  description: optionalText,
-  referencePrice: optionalNumber,
-  editedFields: (v) => Array.isArray(v) && v.every(text),
-});
+  const date: Check = (v) =>
+    typeof v === 'string' && ISO_DATE.test(v) && Date.parse(v) <= now.getTime() + DAY_MS;
+
+  return {
+    id: (v) => typeof v === 'string' && v.trim() !== '' && v.trim() !== '__proto__',
+    url: text,
+    savedAt: date,
+    updatedAt: (v) => v === undefined || date(v),
+    title: optionalText,
+    price: optionalNumber,
+    brand: optionalText,
+    series: optionalText,
+    model: optionalText,
+    year: (v) =>
+      v === null ||
+      (Number.isInteger(v) && (v as number) >= OLDEST_YEAR && (v as number) <= now.getFullYear() + 1),
+    km: optionalNumber,
+    fuel: optionalText,
+    gearbox: optionalText,
+    engine: optionalText,
+    heavyDamage: (v) => v === null || typeof v === 'boolean',
+    damageRecordTL: optionalNumber,
+    parts: (v) =>
+      isObject(v) &&
+      Object.entries(v).every(
+        ([key, status]) => key !== '__proto__' && PART_STATUSES.has(status as PartStatus),
+      ),
+    description: optionalText,
+    referencePrice: optionalNumber,
+    editedFields: (v) => Array.isArray(v) && v.every(text),
+  };
+};
 
 export function toBackup(listings: Listing[], now: Date): string {
   return JSON.stringify(
@@ -59,16 +66,39 @@ export function toBackup(listings: Listing[], now: Date): string {
   );
 }
 
-function toListing(value: unknown, checks: Record<keyof Listing, Check>): Listing {
-  if (!isObject(value)) throw new BackupError('An entry is not a listing');
-  const entries = Object.entries(checks).map(([field, valid]) => {
-    if (!valid(value[field])) throw new BackupError(`Invalid field: ${field}`);
-    return [field, value[field]] as const;
-  });
-  return Object.fromEntries(entries) as unknown as Listing;
+/** An entry that was left out, and the first thing wrong with it (null: not a listing at all). */
+export interface Rejected {
+  position: number; // 1-based, in the file
+  id: string | null;
+  field: keyof Listing | null;
 }
 
-export function parseBackup(content: string, now = new Date()): Listing[] {
+export interface Backup {
+  listings: Listing[];
+  rejected: Rejected[];
+}
+
+function readEntry(
+  value: unknown,
+  position: number,
+  checks: Record<keyof Listing, Check>,
+): { listing: Listing } | { rejected: Rejected } {
+  if (!isObject(value)) return { rejected: { position, id: null, field: null } };
+  const names = Object.keys(checks) as (keyof Listing)[];
+  const field = names.find((name) => !checks[name](value[name]));
+  if (field) {
+    // Shortened: it comes from the file and is only used to point at the entry.
+    const id = typeof value.id === 'string' ? value.id.trim().slice(0, 30) || null : null;
+    return { rejected: { position, id, field } };
+  }
+  const known = names.filter((name) => value[name] !== undefined);
+  return {
+    listing: Object.fromEntries(known.map((name) => [name, value[name]])) as unknown as Listing,
+  };
+}
+
+/** Throws when the file is not a backup; a broken entry is only left out and reported. */
+export function parseBackup(content: string, now = new Date()): Backup {
   let data: unknown;
   try {
     data = JSON.parse(content);
@@ -79,5 +109,11 @@ export function parseBackup(content: string, now = new Date()): Listing[] {
     throw new BackupError('The file is not a backup of this app');
   }
   const checks = fields(now);
-  return data.listings.map((entry) => toListing(entry, checks));
+  const backup: Backup = { listings: [], rejected: [] };
+  data.listings.forEach((entry, index) => {
+    const read = readEntry(entry, index + 1, checks);
+    if ('listing' in read) backup.listings.push(read.listing);
+    else backup.rejected.push(read.rejected);
+  });
+  return backup;
 }

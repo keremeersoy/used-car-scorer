@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { parseBackup, toBackup } from '../../storage/backup';
 import type { RestoreResult } from '../../storage/listings';
 import type { Listing } from '../../types';
-import { restoreSummary, strings } from '../strings';
+import { rejectedSummary, restoreSummary, strings } from '../strings';
 
 // Far above what the browser can store, so only a wrong file is this large.
 const MAX_BYTES = 20 * 1024 * 1024;
@@ -30,15 +30,17 @@ export function Backup({
 
   const restore = async (file: File) => {
     if (file.size > MAX_BYTES) return setMessage(strings.backupTooLarge);
-    let entries: Listing[];
+    let backup: ReturnType<typeof parseBackup>;
     try {
-      entries = parseBackup(await file.text());
+      backup = parseBackup(await file.text());
     } catch {
       return setMessage(strings.backupUnreadable);
     }
     try {
-      const { added, updated, skipped } = await onRestore(entries);
-      setMessage(restoreSummary(added, updated, skipped));
+      const { added, updated, skipped } = await onRestore(backup.listings);
+      setMessage(
+        [restoreSummary(added, updated, skipped), rejectedSummary(backup.rejected)].join(' ').trim(),
+      );
     } catch {
       setMessage(null); // the storage error is already shown
     }

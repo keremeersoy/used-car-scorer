@@ -205,3 +205,24 @@ test('a second click during a save does nothing', async () => {
   expect(writes).toBe(1);
   expect(text()).not.toContain('Üzerine yazılsın mı?');
 });
+
+test('a backup with one broken entry loads the rest and names the broken one', async () => {
+  const fake = fakeChrome([]);
+  await start(fake);
+  await click('[data-tab="saved"]');
+  const content = JSON.stringify({
+    app: 'usedCarScorer',
+    version: 1,
+    listings: [listing({ id: '9' }), { ...listing({ id: '10' }), price: -5 }],
+  });
+  const input = find<HTMLInputElement>('[data-action="restore"]');
+  Object.defineProperty(input, 'files', {
+    configurable: true,
+    value: [{ size: content.length, text: async () => content }],
+  });
+  await act(async () => void input.dispatchEvent(new Event('change', { bubbles: true })));
+  await settle();
+  expect(Object.keys(fake.stored())).toEqual(['9']);
+  expect(text()).toContain('1 eklendi');
+  expect(text()).toContain('#10 (Fiyat (TL))');
+});

@@ -1,7 +1,8 @@
 // All Turkish copy lives here.
 import { config } from '../scoring/config';
+import type { Rejected } from '../storage/backup';
 import type { PriceBand, Reason, SectionKey, Warning } from '../scoring/types';
-import type { PartStatus } from '../types';
+import type { Listing, PartStatus } from '../types';
 import type { Notice } from './panel/panelState';
 
 export const strings = {
@@ -120,6 +121,28 @@ export const formatNumber = (value: number, digits = 1) =>
 
 export const restoreSummary = (added: number, updated: number, skipped: number) =>
   `Yedek yüklendi: ${added} eklendi, ${updated} güncellendi, ${skipped} atlandı.`;
+
+const backupFieldLabels: Partial<Record<keyof Listing, string>> = {
+  ...fieldLabels,
+  url: 'Adres',
+  savedAt: 'Kayıt tarihi',
+  updatedAt: 'Güncelleme tarihi',
+  parts: 'Boya ve değişen',
+  editedFields: 'Düzenleme listesi',
+};
+
+const REJECTED_SHOWN = 5;
+
+export function rejectedSummary(rejected: Rejected[]): string {
+  if (rejected.length === 0) return '';
+  const named = rejected.slice(0, REJECTED_SHOWN).map(({ position, id, field }) => {
+    const name = id ? `#${id}` : `${position}. kayıt`;
+    return `${name} (${field ? backupFieldLabels[field] : 'biçim'})`;
+  });
+  const rest = rejected.length - named.length;
+  const more = rest > 0 ? ` ve ${rest} tane daha` : '';
+  return `${rejected.length} kayıt bozuk olduğu için alınmadı: ${named.join(', ')}${more}.`;
+}
 
 export const formatMoney = (value: number) => `${formatNumber(value, 0)} TL`;
 

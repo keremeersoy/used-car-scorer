@@ -98,7 +98,7 @@ A full tab (`compare.html`, listing ids in the URL), one column per listing, scr
 - Scores are never stored. They are calculated when shown, so a saved listing's score can change as the median, the current year or the config changes **(call)**.
 - Storage errors are shown, never swallowed.
 - A save replaces a saved entry only if it is still the one the draft started from; otherwise the owner is asked.
-- **Backup (added later):** the saved list can be exported to a JSON file and restored from one. A restore checks every field and replaces a saved entry only with a newer one.
+- **Backup (added later):** the saved list can be exported to a JSON file and restored from one. A restore checks every field, leaves out broken entries and names them, and replaces a saved entry only with one changed later (`updatedAt`, set on every write; older entries fall back to `savedAt`).
 
 ## 6. Data model
 
