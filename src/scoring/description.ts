@@ -39,6 +39,19 @@ interface Rule {
   allows: (word: string) => boolean;
 }
 
+const wordsOf = (text: string) => text.split(/[^\p{L}]+/u).filter(Boolean);
+
+/** Whether a word names a car part, or only joins part names in a list. */
+function listedPart(cfg: Config['description']): (word: string) => boolean {
+  const { phrases, partNegation: part } = cfg;
+  const partSpellings = [
+    ...allSpellings(phrases.filter(([name]) => part.phrases.includes(name!)).flat()),
+  ];
+  const listWords = allSpellings(part.listWords);
+  return (word) =>
+    listWords.has(word) || partSpellings.some((spelling) => word.startsWith(spelling));
+}
+
 function rulesFor(name: string, cfg: Config['description']): Rule[] {
   const { negators, fillers, partNegation: part } = cfg;
   const plainFillers = allSpellings(fillers);
@@ -46,15 +59,8 @@ function rulesFor(name: string, cfg: Config['description']): Rule[] {
     return [{ negators: allSpellings(negators), allows: (word) => plainFillers.has(word) }];
   }
 
-  // In "şase, podye, airbag" style lists the other parts do not break the link to a negator.
-  const partSpellings = [
-    ...allSpellings(
-      cfg.phrases.filter(([other]) => part.phrases.includes(other!)).flat(),
-    ),
-  ];
-  const listWords = allSpellings(part.listWords);
-  const isListed = (word: string) =>
-    listWords.has(word) || partSpellings.some((spelling) => word.startsWith(spelling));
+  // In "şase podye airbag" style lists the other parts do not break the link to a negator.
+  const isListed = listedPart(cfg);
   const partFillers = allSpellings(part.fillers);
   const flawlessFillers = allSpellings(part.flawlessFillers);
 
@@ -81,11 +87,54 @@ function isNegated(after: string[], { negators, allows }: Rule): boolean {
 
 /** The words following a match, within its clause; only these can negate it. */
 const wordsAfter = (clause: string, match: RegExpExecArray) =>
-  clause
-    .slice(match.index + match[0].length)
-    .replace(/^\p{L}+/u, '') // the rest of the word, such as a suffix
-    .split(/[^\p{L}]+/u)
-    .filter(Boolean);
+  wordsOf(
+    clause
+      .slice(match.index + match[0].length)
+      .replace(/^\p{L}+/u, ''), // the rest of the word, such as a suffix
+  );
+
+/**
+ * Removes warnings joined to the current one ("pert veya ağır hasar kaydı yoktur"), so that
+ * they do not stand between it and the negator they share.
+ */
+function skipJoinedWarnings(after: string[], cfg: Config['description']): string[] {
+  const split = (words: string[]) => [...allSpellings(words)].map((word) => word.split(/\s+/));
+  const nouns = allSpellings(cfg.connectorNouns);
+  const connectors = split(cfg.connectors);
+  const warnings = split(cfg.phrases.flat());
+  // The last word of a phrase may carry a suffix.
+  const startsAt = (at: number, phrase: string[]) =>
+    phrase.every((word, i) => {
+      const found = after[at + i];
+      return i === phrase.length - 1 ? found?.startsWith(word) : found === word;
+    });
+
+  let from = 0;
+  while (from < after.length && nouns.has(after[from]!)) from++;
+  const connector = connectors.find((phrase) => startsAt(from, phrase));
+  if (!connector) return after;
+  const joined = warnings.find((phrase) => startsAt(from + connector.length, phrase));
+  if (!joined) return after;
+  const rest = after.slice(from + connector.length + joined.length);
+  return [...after.slice(0, from), ...skipJoinedWarnings(rest, cfg)];
+}
+
+/** Splits a sentence into clauses, keeping a comma-separated list of parts together. */
+function clausesOf(sentence: string, isListed: (word: string) => boolean): string[] {
+  const pieces = sentence.split(CLAUSE);
+  const clauses: string[] = [];
+  let carried = '';
+  pieces.forEach((piece, index) => {
+    const words = wordsOf(fold(piece));
+    if (index < pieces.length - 1 && words.length > 0 && words.every(isListed)) {
+      carried += `${piece},`;
+    } else {
+      clauses.push(carried + piece);
+      carried = '';
+    }
+  });
+  return clauses;
+}
 
 export function scoreDescription(text: string | null, cfg: Config): SectionResult {
   const max = cfg.weights.description;
@@ -101,18 +150,19 @@ export function scoreDescription(text: string | null, cfg: Config): SectionResul
       pattern: phrasePattern(variants),
       rules: rulesFor(variants[0]!, cfg.description),
     }));
+  const isListed = listedPart(cfg.description);
   const charged = new Set<string>();
   const reasons: Reason[] = [];
 
   for (const sentence of text.split(SENTENCE)) {
-    for (const clause of sentence.split(CLAUSE)) {
+    for (const clause of clausesOf(sentence, isListed)) {
       const folded = fold(clause);
       for (const { phrase, pattern, rules } of patterns) {
         const matches = [...folded.matchAll(pattern)];
         if (matches.length === 0) continue;
         // The clause is cleared only if every mention in it is.
         const negated = matches.every((match) => {
-          const after = wordsAfter(folded, match);
+          const after = skipJoinedWarnings(wordsAfter(folded, match), cfg.description);
           return rules.some((candidate) => isNegated(after, candidate));
         });
         const charge = !negated && !charged.has(phrase);

@@ -18,8 +18,13 @@ export function parsePrice(text: string): ParsedNumber {
   return parsed.ok && parsed.value === 0 ? { ok: true, value: null } : parsed;
 }
 
-export function parseYear(text: string): ParsedNumber {
+const OLDEST_YEAR = 1900;
+
+/** Rejects years no car can have, such as 2108 typed for 2018. */
+export function parseYear(text: string, latest = new Date().getFullYear() + 1): ParsedNumber {
   const trimmed = text.trim();
   if (trimmed === '') return { ok: true, value: null };
-  return /^\d{4}$/.test(trimmed) ? { ok: true, value: Number(trimmed) } : { ok: false };
+  if (!/^\d{4}$/.test(trimmed)) return { ok: false };
+  const value = Number(trimmed);
+  return value >= OLDEST_YEAR && value <= latest ? { ok: true, value } : { ok: false };
 }

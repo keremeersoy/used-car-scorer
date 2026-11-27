@@ -42,6 +42,7 @@ test.each<[string, Partial<Listing>]>([
   ['engine', { engine: 'x' }], ['fuel', { fuel: 'x' }], ['gearbox', { gearbox: 'x' }],
   ['year 2 apart', { year: 2022 }], ['older than 30 days', { savedAt: '2026-10-27T12:00:00Z' }],
   ['no price', { price: null }], ['heavy damage', { heavyDamage: true }],
+  ['unreadable date', { savedAt: 'broken' }],
 ])('excludes a different %s', (_, o) => {
   const saved = [...pool(five.slice(1)), listing({ id: 'odd', ...o })];
   expect(findReference(listing(), saved, NOW, testCfg)).toMatchObject({ value: null, found: 4 });

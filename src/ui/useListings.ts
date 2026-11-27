@@ -3,10 +3,13 @@ import { createListingStore, STORE_KEY, StorageDataError } from '../storage/list
 import type { Listing } from '../types';
 import { strings } from './strings';
 
-const store = createListingStore({
-  get: (key) => chrome.storage.local.get(key),
-  set: (items) => chrome.storage.local.set(items),
-});
+const store = createListingStore(
+  {
+    get: (key) => chrome.storage.local.get(key),
+    set: (items) => chrome.storage.local.set(items),
+  },
+  async (task) => await navigator.locks.request(STORE_KEY, task),
+);
 
 /** The latest saved listings. Storage errors are reported by the hook, not here. */
 export const loadSaved = (): Promise<Listing[]> => store.getAll().catch(() => []);

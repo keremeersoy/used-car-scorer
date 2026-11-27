@@ -27,7 +27,10 @@ const isListing = (value: unknown): value is Listing =>
   isObject(value.parts) &&
   Array.isArray(value.editedFields);
 
-export function createListingStore(area: StorageArea) {
+/** Runs a task while no other holder of the lock runs. */
+export type Lock = <T>(task: () => Promise<T>) => Promise<T>;
+
+export function createListingStore(area: StorageArea, lock: Lock = (task) => task()) {
   const read = async (): Promise<Stored> => {
     const raw = (await area.get(STORE_KEY))[STORE_KEY];
     if (raw === undefined) return { version: 1, listings: {} };
@@ -45,11 +48,14 @@ export function createListingStore(area: StorageArea) {
   // Writes run one after another, so two read-modify-write cycles cannot interleave.
   let queue: Promise<unknown> = Promise.resolve();
   const change = (apply: (listings: Stored['listings']) => void): Promise<void> => {
-    const result = queue.then(async () => {
-      const stored = await read();
-      apply(stored.listings);
-      await area.set({ [STORE_KEY]: stored });
-    });
+    // The lock does the same across panels in different windows.
+    const result = queue.then(() =>
+      lock(async () => {
+        const stored = await read();
+        apply(stored.listings);
+        await area.set({ [STORE_KEY]: stored });
+      }),
+    );
     queue = result.catch(() => undefined); // a failed write must not block later ones
     return result;
   };

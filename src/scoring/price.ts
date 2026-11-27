@@ -17,7 +17,9 @@ function isComparable(target: Scorable, other: Listing, now: Date, cfg: Config):
   if (other.price === null || other.price <= 0) return false;
   if (target.year === null || other.year === null) return false;
   if (Math.abs(other.year - target.year) > cfg.price.yearSpread) return false;
-  if (now.getTime() - Date.parse(other.savedAt) > cfg.price.maxAgeDays * DAY_MS) return false;
+  const age = now.getTime() - Date.parse(other.savedAt);
+  // Written this way so that an unreadable date (NaN) is left out too.
+  if (!(age <= cfg.price.maxAgeDays * DAY_MS)) return false;
   return MATCH_FIELDS.every((field) => {
     const wanted = normalise(target[field]);
     return wanted !== '' && wanted === normalise(other[field]); // a blank value never matches

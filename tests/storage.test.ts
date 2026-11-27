@@ -61,3 +61,18 @@ test('a failed write rejects and does not block later writes', async () => {
   await store.save(listing({ id: 'b' }));
   expect(await store.getAll()).toHaveLength(1);
 });
+
+test('two panels sharing a lock keep both saves', async () => {
+  const area = fakeArea();
+  let queue: Promise<unknown> = Promise.resolve();
+  const lock = <T>(task: () => Promise<T>): Promise<T> => {
+    const result = queue.then(task);
+    queue = result.catch(() => undefined);
+    return result;
+  };
+  await Promise.all([
+    createListingStore(area, lock).save(listing({ id: 'a' })),
+    createListingStore(area, lock).save(listing({ id: 'b' })),
+  ]);
+  expect(await createListingStore(area).getAll()).toHaveLength(2);
+});

@@ -42,6 +42,9 @@ export interface Config {
     /** A negator clears a phrase only if every word between them is a filler. */
     negators: string[];
     fillers: string[];
+    /** Warnings joined by one of these share a negation ("pert veya ağır hasar kaydı yoktur"). */
+    connectors: string[];
+    connectorNouns: string[]; // words that may stand between a warning and a connector
     /** Extra negations that are only safe after a phrase naming a car part. */
     partNegation: {
       phrases: string[]; // names of the warnings that are about a car part
@@ -118,6 +121,8 @@ export const config: Config = {
       'kayıt', 'kaydı', 'kayıtlı', 'durumu', 'hasarı', 'hiç', 'herhangi', 'bir',
       'kesinlikle', 'dahi', 'bile',
     ],
+    connectors: ['ve', 'veya', 'ya da'],
+    connectorNouns: ['kayıt', 'kaydı', 'hasarı'],
     partNegation: {
       phrases: ['airbag', 'şasi'],
       listWords: ['podye', 'direk', 'direkler', 'tavan', 've'],

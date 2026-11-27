@@ -65,6 +65,17 @@ test.each<[string, number]>([
   ['Şase podye işlem yoktur', 10],
   ['Şase işlemli podye hatasız', 7],
   ['Airbag açık şasi hatasız', 7],
+  // Warnings joined by "ve" or "veya" share one negation.
+  ['Pert veya ağır hasar kaydı yoktur', 10],
+  ['Pert kaydı ve ağır hasar kaydı bulunmamaktadır', 10],
+  ['Pert ya da ağır hasar yok', 10],
+  ['Pert kayıtlı ve ağır hasar yok', 7],
+  ['Pert ve acil satılık değil', 4],
+  // A part list written with commas.
+  ['Şasi, airbag ve podye hatasız', 10],
+  ['Şase, podye, airbag sorunsuz', 10],
+  ['Airbag, motor arızalı', 4],
+  ['Airbag, boya yok', 7],
 ])('%s → %i', (text, points) => expect(run(text).points).toBe(points));
 
 test('every match shows its sentence, negated ones uncounted', () => {

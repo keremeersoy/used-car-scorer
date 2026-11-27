@@ -18,3 +18,11 @@ test('a year is blank or exactly four digits', () => {
   expect(parseYear('2018')).toEqual({ ok: true, value: 2018 });
   for (const text of ['18', '2.018', '20180', 'abcd']) expect(parseYear(text)).toEqual({ ok: false });
 });
+
+test('a model year must be plausible', () => {
+  expect(parseYear('1900', 2027)).toEqual({ ok: true, value: 1900 });
+  expect(parseYear('2027', 2027)).toEqual({ ok: true, value: 2027 });
+  for (const text of ['1899', '2028', '2108', '0000']) {
+    expect(parseYear(text, 2027)).toEqual({ ok: false });
+  }
+});
