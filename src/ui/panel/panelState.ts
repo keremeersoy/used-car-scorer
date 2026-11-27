@@ -64,6 +64,20 @@ export function afterSave(state: PanelState, saved: Listing[]): PanelState {
   return { ...state, draft };
 }
 
+/**
+ * The draft was edited while it was being written. Those edits are still unsaved, but the entry
+ * it came from is now the one just written, so saving again replaces nothing unexpected.
+ */
+export function savedWhileEditing(
+  state: PanelState,
+  saved: Listing[],
+  writtenId: string,
+): PanelState {
+  const entry = findById(saved, writtenId);
+  if (!entry || state.draft?.listing.id.trim() !== writtenId) return state;
+  return { ...state, draft: { ...state.draft, savedAt: entry.savedAt } };
+}
+
 /** True when saving would replace an entry this draft was not started from. */
 export function wouldOverwrite(draft: Draft, saved: Listing[]): boolean {
   const entry = findById(saved, draft.listing.id.trim());

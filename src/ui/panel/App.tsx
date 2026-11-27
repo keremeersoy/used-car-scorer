@@ -8,10 +8,11 @@ import { requestKey, takeReadRequest } from '../../read/request';
 import { config } from '../../scoring/config';
 import { scoreListing } from '../../scoring/score';
 import { noticeText, strings } from '../strings';
-import { loadSaved, useListings } from '../useListings';
+import { useListings } from '../useListings';
 import { ListingForm } from './ListingForm';
 import {
-  afterSave, discardAndReplace, initialState, keepCurrent, receive, wouldOverwrite, type ReadResult,
+  afterSave, discardAndReplace, initialState, keepCurrent, receive, savedWhileEditing,
+  wouldOverwrite, type ReadResult,
 } from './panelState';
 import { ReplacePrompt } from './ReplacePrompt';
 import { SavedList } from './SavedList';
@@ -37,7 +38,7 @@ export function App() {
   const [formValid, setFormValid] = useState(true);
   const [confirmingOverwrite, setConfirmingOverwrite] = useState(false);
   const [savedRevision, setSavedRevision] = useState<number | null>(null);
-  const { listings, error, save, remove } = useListings();
+  const { listings, error, load, save, remove } = useListings();
   const begin = useRef(createSequence()).current;
 
   const read = useCallback(
@@ -45,12 +46,12 @@ export function App() {
       const isCurrent = begin();
       const result = toResult(await readTab(tabId, chromeTabApi));
       // Read the saved data now, so typed values are merged even right after the panel opens.
-      const saved = await loadSaved();
+      const saved = (await load()) ?? [];
       if (!isCurrent()) return;
       setState((current) => receive(current, result, saved));
       setTab('listing');
     },
-    [begin],
+    [begin, load],
   );
 
   // A page is read only after a click: the toolbar icon (a request) or "Tekrar oku".
@@ -84,20 +85,27 @@ export function App() {
 
   const saveDraft = async (confirmed = false) => {
     if (!draft || !canSave) return;
-    if (!confirmed && wouldOverwrite(draft, await loadSaved())) {
+    const before = await load();
+    if (!before) return; // without the saved data an overwrite could not be noticed
+    if (!confirmed && wouldOverwrite(draft, before)) {
       setConfirmingOverwrite(true);
       return;
     }
     setConfirmingOverwrite(false);
+    const entry = toListing(draft, new Date());
     try {
-      await save(toListing(draft, new Date()));
+      await save(entry);
     } catch {
       return; // the error is shown and the draft stays unsaved
     }
-    const saved = await loadSaved();
-    // If the draft was edited while saving, those edits are still unsaved.
-    setState((current) => (current.draft === draft ? afterSave(current, saved) : current));
-    setSavedRevision(state.revision);
+    const saved = (await load()) ?? [];
+    const { revision } = state;
+    setState((current) => {
+      if (current.draft === draft) return afterSave(current, saved);
+      if (current.revision !== revision) return current; // another listing is shown now
+      return savedWhileEditing(current, saved, entry.id.trim());
+    });
+    setSavedRevision(revision);
   };
 
   const change = (apply: (current: Draft) => Draft) =>
@@ -143,8 +151,8 @@ export function App() {
             canSave={canSave}
             onSave={() => void saveDraft()}
             onDiscard={() =>
-              void loadSaved().then((saved) =>
-                setState((current) => discardAndReplace(current, saved)),
+              void load().then((saved) =>
+                setState((current) => discardAndReplace(current, saved ?? [])),
               )
             }
             onStay={() => setState(keepCurrent)}
@@ -204,6 +212,7 @@ export function App() {
         <SavedList
           listings={listings}
           onOpen={(listing) => {
+            begin(); // a read still in progress must not replace what was just opened
             setState((current) => receive(current, { kind: 'saved', listing }, listings));
             setTab('listing');
           }}

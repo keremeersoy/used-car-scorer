@@ -11,26 +11,31 @@ const store = createListingStore(
   async (task) => await navigator.locks.request(STORE_KEY, task),
 );
 
-/** The latest saved listings. Storage errors are reported by the hook, not here. */
-export const loadSaved = (): Promise<Listing[]> => store.getAll().catch(() => []);
-
-const describe = (error: unknown) =>
+const describe = (error: unknown, failed: string) =>
   error instanceof StorageDataError
     ? strings.storageUnreadable
-    : `${strings.storageFailed} ${error instanceof Error ? error.message : String(error)}`;
+    : `${failed} ${error instanceof Error ? error.message : String(error)}`;
 
 export function useListings() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const reload = useCallback(async () => {
+  /** The latest saved listings, or null (and a shown error) when they cannot be read. */
+  const load = useCallback(async (): Promise<Listing[] | null> => {
     try {
-      setListings(await store.getAll());
-      setError(null);
+      return await store.getAll();
     } catch (cause) {
-      setError(describe(cause));
+      setError(describe(cause, strings.storageReadFailed));
+      return null;
     }
   }, []);
+
+  const reload = useCallback(async () => {
+    const saved = await load();
+    if (!saved) return;
+    setListings(saved);
+    setError(null);
+  }, [load]);
 
   useEffect(() => {
     void reload();
@@ -46,7 +51,7 @@ export function useListings() {
       try {
         await operation();
       } catch (cause) {
-        setError(describe(cause));
+        setError(describe(cause, strings.storageFailed));
         throw cause;
       }
       await reload();
@@ -57,5 +62,5 @@ export function useListings() {
   const save = useCallback((listing: Listing) => write(() => store.save(listing)), [write]);
   const remove = useCallback((id: string) => write(() => store.remove(id)), [write]);
 
-  return { listings, error, save, remove };
+  return { listings, error, load, save, remove };
 }

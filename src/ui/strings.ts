@@ -39,6 +39,7 @@ export const strings = {
   damageRecordHint: 'Boş: bilinmiyor · 0: kayıt yok',
   storageUnreadable: 'Kayıtlı veriler okunamadı. Veriler değiştirilmedi.',
   storageFailed: 'Kayıt işlemi başarısız oldu:',
+  storageReadFailed: 'Kayıtlı veriler okunamadı:',
   compareNothing: 'Karşılaştırılacak kayıtlı ilan bulunamadı.',
   openListing: 'İlanı aç',
   leftOut: 'Puana katılmayan:',
