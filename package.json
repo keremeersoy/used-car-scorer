@@ -2,7 +2,11 @@
   "name": "used-car-scorer",
   "private": true,
   "version": "0.1.0",
+  "description": "Chrome extension that scores an open used car listing and compares saved ones",
   "type": "module",
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
