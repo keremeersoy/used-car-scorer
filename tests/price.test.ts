@@ -185,3 +185,43 @@ test('blank price gives no price score and no insufficient-data warning', () => 
     warnings: [],
   });
 });
+
+test('the overview says why remembered cars were left out', () => {
+  const seen = [
+    observation({ id: 'ok' }),
+    observation({ id: 'brand', brand: 'x' }),
+    observation({ id: 'series', series: 'x' }),
+    observation({ id: 'pack', model: 'x' }),
+    observation({ id: 'fuel', fuel: 'x' }),
+    observation({ id: 'year', year: 2010 }),
+    observation({ id: 'km', km: 500_000 }),
+    observation({ id: 'heavy', heavyDamage: true }),
+    observation({ id: 'paint', parts: {} }),
+    observation({ id: 'old', savedAt: '2026-01-01T00:00:00Z' }),
+    observation({ id: '1' }), // the car being looked at
+  ];
+  const overview = market(listing(), [], seen, NOW, testCfg);
+  expect(overview.remembered).toBe(10);
+  expect(overview.peers.map((p) => p.id)).toEqual(['ok']);
+  expect(overview.leftOut).toEqual({
+    otherModel: 2,
+    otherPackage: 1,
+    otherDrive: 1,
+    year: 1,
+    km: 1,
+    heavy: 1,
+    parts: 1,
+    old: 1,
+  });
+});
+
+test('the overview names what could not be read on this car', () => {
+  const overview = market(
+    listing({ fuel: null, km: null }),
+    [],
+    [observation({ id: 'a' })],
+    NOW,
+    testCfg,
+  );
+  expect(overview.unread).toEqual(['fuel', 'km']);
+});

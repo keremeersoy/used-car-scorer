@@ -1,6 +1,6 @@
 // All Turkish copy lives here.
 import { config } from '../scoring/config';
-import type { ConditionClass } from '../scoring/market';
+import type { ConditionClass, LeftOut } from '../scoring/market';
 import type { PriceBand, Reason, SectionKey, Warning } from '../scoring/types';
 import type { Rejected } from '../storage/backup';
 import type { Listing, PartStatus } from '../types';
@@ -26,7 +26,8 @@ export const strings = {
   marketTitle: 'Fiyat kıyası',
   thisCar: '(bu araç)',
   peers: 'Emsaller',
-  marketHint: 'Aynı paketten başka ilanları açtıkça burada birikir.',
+  marketEmpty: 'Henüz hatırlanan başka ilan yok. Otomatik oku açıkken ilanları açtıkça birikir.',
+  marketUnread: 'Kıyas için gereken şu bilgiler bu ilanda boş:',
   poolTitle: 'Fiyat kıyası havuzu',
   poolHint:
     'Baktığın ilanların fiyatı ve kaporta durumu 30 gün boyunca yalnızca bu tarayıcıda hatırlanır.',
@@ -222,9 +223,11 @@ export function reasonText(reason: Reason, partLabel: (key: string) => string): 
     case 'phrase': {
       const outcome = reason.negated
         ? 'olumsuz ifade, sayılmadı'
-        : reason.points > 0
-          ? `−${reason.points} puan`
-          : 'tekrar, yeniden sayılmadı';
+        : reason.mentionOnly
+          ? 'sorun belirtilmemiş, sayılmadı'
+          : reason.points > 0
+            ? `−${reason.points} puan`
+            : 'tekrar, yeniden sayılmadı';
       return `“${reason.phrase}” (${outcome}): ${reason.sentence}`;
     }
   }
@@ -337,3 +340,18 @@ export function marketText(reason: PriceReason, own: ConditionClass | null): str
   const caution = reason.lowData ? ' Bu sonuç az veriyle çıktı.' : '';
   return `${band} ${group}${reason.count} benzer aracın ortancası ${amount}.${caution}`;
 }
+
+export const leftOutText: Record<LeftOut, string> = {
+  otherModel: 'farklı marka veya seri',
+  otherPackage: 'aynı seriden farklı paket',
+  otherDrive: 'farklı yakıt veya vites',
+  year: 'model yılı uzak',
+  km: `km farkı ${formatNumber(config.price.kmSpread, 0)}’den fazla`,
+  heavy: 'ağır hasarlı',
+  parts: 'boya bilgisi eksik',
+  old: `${config.price.maxAgeDays} günden eski`,
+  noPrice: 'fiyatı yok',
+};
+
+export const rememberedText = (remembered: number, similar: number) =>
+  `Hatırlanan ${remembered} ilanın ${similar} tanesi benzer.`;

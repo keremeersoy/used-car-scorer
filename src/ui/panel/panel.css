@@ -611,3 +611,12 @@ button[data-action="no-record"] {
 .peers a {
   color: var(--accent);
 }
+
+.remembered {
+  margin-top: 10px;
+  color: var(--muted);
+}
+.remembered ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

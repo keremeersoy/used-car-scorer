@@ -76,6 +76,20 @@ test.each<[string, number]>([
   ['Şase, podye, airbag sorunsuz', 10],
   ['Airbag, motor arızalı', 4],
   ['Airbag, boya yok', 7],
+  // Naming a part is not a problem: equipment lists and "it is fine".
+  ['ABS, airbag, klima, hız sabitleyici', 10],
+  ['Sürücü ve yolcu airbag mevcuttur', 10],
+  ['6 airbag, ESP, geri görüş kamerası', 10],
+  ['Yan airbag, perde airbag', 10],
+  ['Airbagler orijinaldir', 10],
+  ['Diğer egirbekler orjinal', 10],
+  ['Şasi podye direkler orijinal', 10],
+  // A part with something wrong said about it still counts.
+  ['Patlak airbag', 7],
+  ['Değişen airbag var', 7],
+  ['Airbag lambası yanıyor', 7],
+  ['Şaside kaynak var', 7],
+  ['Airbag tamirli', 7],
   // "airbag yok" may mean the car has none, so a part needs a word saying what is absent.
   ['Airbag yok', 7],
   ['Araçta airbag yoktur', 7],
@@ -116,4 +130,10 @@ test('a repeated phrase is charged once', () => {
 
 test.each([null, '', '   '])('blank description %j is left out', (text) => {
   expect(run(text)).toMatchObject({ points: null, warnings: ['descriptionMissing'] });
+});
+
+test('a part only mentioned is shown as such and not charged', () => {
+  expect(run('Sürücü airbag mevcut.').reasons).toMatchObject([
+    { phrase: 'airbag', negated: false, mentionOnly: true, points: 0 },
+  ]);
 });

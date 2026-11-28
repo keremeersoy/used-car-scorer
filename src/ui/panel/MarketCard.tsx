@@ -1,9 +1,18 @@
 // Where the asking price stands among similar cars, and which cars those are.
 
 import { isSahibindenUrl } from '../../read/readTab';
-import { CONDITIONS, type Market } from '../../scoring/market';
+import { CONDITIONS, type LeftOut, type Market } from '../../scoring/market';
 import type { SectionResult } from '../../scoring/types';
-import { conditionLabels, formatMoney, formatNumber, marketText, strings } from '../strings';
+import {
+  conditionLabels,
+  fieldLabels,
+  formatMoney,
+  formatNumber,
+  leftOutText,
+  marketText,
+  rememberedText,
+  strings,
+} from '../strings';
 
 export function MarketCard({ market, price }: { market: Market; price: SectionResult }) {
   // Without a price of its own there is nothing to place.
@@ -35,6 +44,25 @@ export function MarketCard({ market, price }: { market: Market; price: SectionRe
           })}
         </tbody>
       </table>
+      {market.unread.length > 0 && (
+        <p className="quiet">
+          {strings.marketUnread} {market.unread.map((field) => fieldLabels[field]).join(', ')}
+        </p>
+      )}
+      {market.remembered === 0 ? (
+        <p className="quiet">{strings.marketEmpty}</p>
+      ) : (
+        <div className="remembered">
+          <p>{rememberedText(market.remembered, market.peers.length)}</p>
+          <ul>
+            {Object.entries(market.leftOut).map(([why, count]) => (
+              <li key={why}>
+                {count} {leftOutText[why as LeftOut]}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {market.peers.length > 0 ? (
         <details>
           <summary>
@@ -56,9 +84,7 @@ export function MarketCard({ market, price }: { market: Market; price: SectionRe
             ))}
           </ul>
         </details>
-      ) : (
-        <p className="quiet">{strings.marketHint}</p>
-      )}
+      ) : null}
     </section>
   );
 }

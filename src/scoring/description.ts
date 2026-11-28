@@ -128,6 +128,27 @@ function skipJoinedWarnings(after: string[], cfg: Config['description']): string
   return [...after.slice(0, from), ...skipJoinedWarnings(rest, cfg)];
 }
 
+/**
+ * Whether something wrong is said about a part: a problem word shortly after it, or an adjective
+ * right before it ("patlak airbag").
+ */
+function isTroubled(
+  clause: string,
+  match: RegExpExecArray,
+  part: Config['description']['partNegation'],
+): boolean {
+  const stems = [...allSpellings(part.problems)];
+  const free = (word: string) => /(siz|sız|suz|süz)/.test(word);
+  const isProblem = (word: string) => !free(word) && stems.some((stem) => word.startsWith(stem));
+  const after = wordsAfter(clause, match).slice(0, part.problemReach);
+  const before = wordsOf(clause.slice(0, match.index)).at(-1);
+  // "yok" and "değil" before the part belong to something else.
+  const negations = allSpellings(['yok', 'değil']);
+  const adjective =
+    before !== undefined && isProblem(before) && ![...negations].some((n) => before.startsWith(n));
+  return adjective || after.some(isProblem);
+}
+
 /** Splits a sentence into clauses, keeping a comma-separated list of parts together. */
 function clausesOf(sentence: string, isListed: (word: string) => boolean): string[] {
   const pieces = sentence.split(CLAUSE);
@@ -181,13 +202,18 @@ export function scoreDescription(text: string | null, cfg: Config): SectionResul
               : words;
           return rules.some((candidate) => isNegated(after, candidate, cancellers));
         });
-        const charge = !negated && !charged.has(phrase);
+        const aboutPart = cfg.description.partNegation.phrases.includes(phrase);
+        const troubled =
+          !aboutPart ||
+          matches.some((match) => isTroubled(folded, match, cfg.description.partNegation));
+        const charge = troubled && !negated && !charged.has(phrase);
         if (charge) charged.add(phrase);
         reasons.push({
           code: 'phrase',
           phrase,
           sentence: sentence.trim(),
           negated,
+          ...(!troubled && !negated && { mentionOnly: true }),
           points: charge ? penalty : 0,
         });
       }

@@ -150,7 +150,7 @@ Reference: the manual `referencePrice` if entered (above 0). Otherwise the media
 - Similar: same brand, series, model, fuel and gearbox (trimmed, Turkish-locale case-insensitive; a blank value never matches), year within ±1, km within 40,000, seen in the last 30 days, has a price, not this listing, not marked heavy damage = yes. Engine is no longer matched; the model name carries it.
 - Condition groups: **clean** (no replaced part, at most one painted or locally painted), **painted** (no replaced part, two or more painted), **replaced** (at least one replaced). A car with any unknown part is in no group. A heavily damaged car is compared with none.
 - At least 5 cars in the car's own group are trusted; 3 or 4 are used and marked as little data; fewer give no price score.
-- The panel shows all three groups with counts and medians, and the cars behind them.
+- The panel shows all three groups with counts and medians, the cars behind them, how many remembered cars there are, why the others were left out, and which needed fields are blank on this car.
 
 `diff = (price − reference) / reference`
 
@@ -174,6 +174,7 @@ The panel shows which reference was used, and for a median how many listings it 
 - Default warnings: "ağır hasar", "pert", "airbag", "şasi", "motor arızalı", "acil". Other spellings belong to one warning and are charged once: "egirbek" and "airbek" for airbag, "şase" for şasi (added by the owner after real pages). Spellings typed without Turkish letters ("sasi", "agir hasar") match too.
 - A part warning followed only by "yok" ("airbag yok") is unclear and counts; it needs a word saying what is absent ("airbag sorunu yok").
 - Warnings joined by "ve", "veya" or "ya da" share one negation, only between bare record or part warnings (never "motor arızalı" or "acil", never "ağır hasarlı ve …"). A negator followed by "değil" or a question particle clears nothing. A list of parts written with commas stays one clause.
+- A warning about a part (airbag, şasi) counts only when something wrong is said about it: a problem word within four words after it, or an adjective right before it. Equipment lists and "airbags are original" are shown as mentions and cost nothing (owner decision).
 - Every match in a clause is checked; the clause is cleared only if all of them are negated. In a list of parts ("şase podye airbag hatasız") the other part names do not separate a part warning from its negator.
 - Matching is Turkish-locale lowercase and must start at a word boundary that understands Turkish letters. Suffixes are allowed. Without this, "pert" would match inside "ekspertiz".
 - Negation: a match is negated only when a negator follows it in the same clause with nothing but filler words in between ("pert kaydı yoktur"), so "pert kayıtlı motor sorunsuz" still counts. Negators: "yok", "yoktur", "değil", "değildir", "bulunmamaktadır", "bulunmuyor". "hatasız" and "sorunsuz" (added by the owner) clear only phrases that name a part (airbag, şasi and the airbag spellings). The word lists are in the config. Clauses end at `. ! ? ; ,` or a line break. **(tightened after the final review)** Unclear cases count against the listing.

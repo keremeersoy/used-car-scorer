@@ -24,7 +24,14 @@ export type Reason =
     }
   | { code: 'noReference'; found: number; why?: 'few' | 'heavy' | 'parts' }
   | { code: 'kmPerYear'; value: number; points: number }
-  | { code: 'phrase'; phrase: string; sentence: string; negated: boolean; points: number };
+  | {
+      code: 'phrase';
+      phrase: string;
+      sentence: string;
+      negated: boolean;
+      mentionOnly?: boolean; // a part named with nothing wrong said about it
+      points: number;
+    };
 
 export type Warning =
   | 'unknownParts'

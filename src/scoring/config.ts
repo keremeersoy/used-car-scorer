@@ -61,6 +61,13 @@ export interface Config {
       fillers: string[];
       flawless: string[]; // words saying the part is fine
       flawlessFillers: string[];
+      /**
+       * Naming a part is not a warning by itself (equipment lists, "airbags are fine"). It counts
+       * only with one of these word beginnings close by. A word saying it is free of the trouble
+       * ("hasarsız") does not count.
+       */
+      problems: string[];
+      problemReach: number; // how many words after the part are looked at
     };
   };
 }
@@ -164,6 +171,35 @@ export const config: Config = {
       ],
       flawless: ['hatasız', 'hatasızdır', 'sorunsuz', 'sorunsuzdur'],
       flawlessFillers: ['orijinal', 'orjinal', 've'],
+      problems: [
+        'açık',
+        'açıl',
+        'açmış',
+        'açtı',
+        'açan',
+        'patla',
+        'değiş',
+        'tamir',
+        'onar',
+        'işlem',
+        'arıza',
+        'hasar',
+        'kaynak',
+        'düzelt',
+        'çekme',
+        'çektir',
+        'kesik',
+        'eğik',
+        'yamuk',
+        'yenile',
+        'sorun',
+        'problem',
+        'yanıyor',
+        'eksik',
+        'yok',
+        'değil',
+      ],
+      problemReach: 4,
     },
   },
 };

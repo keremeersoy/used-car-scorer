@@ -13,12 +13,26 @@ export interface Market {
   own: ConditionClass | null;
   groups: Record<ConditionClass, { count: number; median: number | null }>;
   peers: Peer[]; // cheapest first
+  remembered: number; // other listings that were looked at or saved
+  leftOut: Partial<Record<LeftOut, number>>;
+  /** Fields blank on this car without which nothing can match. */
+  unread: (typeof NEEDED)[number][];
 }
 
+/** The first reason a remembered car cannot be compared with. */
+export type LeftOut =
+  | 'otherModel'
+  | 'otherPackage'
+  | 'otherDrive'
+  | 'year'
+  | 'km'
+  | 'heavy'
+  | 'parts'
+  | 'old'
+  | 'noPrice';
+
 const DAY_MS = 24 * 60 * 60 * 1000;
-// Series is matched so that equal model names in different series do not mix. The model name
-// carries the package.
-const MATCH_FIELDS = ['brand', 'series', 'model', 'fuel', 'gearbox'] as const;
+const NEEDED = ['brand', 'series', 'model', 'fuel', 'gearbox', 'year', 'km'] as const;
 
 const normalise = (value: string | null) => value?.trim().toLocaleLowerCase('tr-TR') ?? '';
 
@@ -49,21 +63,29 @@ function combine(saved: Listing[], seen: Observation[]): Observation[] {
   return [...byId.values()];
 }
 
-function isSimilar(target: Scorable, other: Observation, now: Date, cfg: Config): boolean {
+function whyLeftOut(target: Scorable, other: Observation, now: Date, cfg: Config): LeftOut | null {
   const rules = cfg.price;
-  if (other.id === target.id || other.heavyDamage === true) return false;
-  if (other.price === null || other.price <= 0) return false;
-  if (target.year === null || other.year === null) return false;
-  if (Math.abs(other.year - target.year) > rules.yearSpread) return false;
-  if (target.km === null || other.km === null) return false;
-  if (Math.abs(other.km - target.km) > rules.kmSpread) return false;
+  const differs = (field: 'brand' | 'series' | 'model' | 'fuel' | 'gearbox') => {
+    const wanted = normalise(target[field]);
+    return wanted === '' || wanted !== normalise(other[field]); // a blank value never matches
+  };
+  const apart = (one: number | null, two: number | null, limit: number) =>
+    one === null || two === null || Math.abs(one - two) > limit;
+
+  // Series is matched so that equal model names in different series do not mix. The model name
+  // carries the package.
+  if (differs('brand') || differs('series')) return 'otherModel';
+  if (differs('model')) return 'otherPackage';
+  if (differs('fuel') || differs('gearbox')) return 'otherDrive';
+  if (apart(target.year, other.year, rules.yearSpread)) return 'year';
+  if (apart(target.km, other.km, rules.kmSpread)) return 'km';
+  if (other.heavyDamage === true) return 'heavy';
+  if (conditionOf(other.parts, cfg) === null) return 'parts';
   const age = now.getTime() - Date.parse(other.seenAt);
   // Written this way so that an unreadable date (NaN) is left out too.
-  if (!(age <= rules.maxAgeDays * DAY_MS)) return false;
-  return MATCH_FIELDS.every((field) => {
-    const wanted = normalise(target[field]);
-    return wanted !== '' && wanted === normalise(other[field]); // a blank value never matches
-  });
+  if (!(age <= rules.maxAgeDays * DAY_MS)) return 'old';
+  if (other.price === null || other.price <= 0) return 'noPrice';
+  return null;
 }
 
 export function median(values: number[]): number {
@@ -79,13 +101,15 @@ export function market(
   now: Date,
   cfg: Config,
 ): Market {
-  const peers = combine(saved, seen)
-    .filter((other) => isSimilar(target, other, now, cfg))
-    .flatMap((other) => {
-      const condition = conditionOf(other.parts, cfg);
-      return condition ? [{ ...other, condition }] : [];
-    })
-    .sort((a, b) => a.price! - b.price!);
+  const others = combine(saved, seen).filter((other) => other.id !== target.id);
+  const leftOut: Market['leftOut'] = {};
+  const peers: Peer[] = [];
+  for (const other of others) {
+    const why = whyLeftOut(target, other, now, cfg);
+    if (why) leftOut[why] = (leftOut[why] ?? 0) + 1;
+    else peers.push({ ...other, condition: conditionOf(other.parts, cfg)! });
+  }
+  peers.sort((a, b) => a.price! - b.price!);
 
   const group = (condition: ConditionClass) => {
     const prices = peers.filter((p) => p.condition === condition).map((p) => p.price!);
@@ -97,5 +121,8 @@ export function market(
     own: target.heavyDamage === true ? null : conditionOf(target.parts, cfg),
     groups: { clean: group('clean'), painted: group('painted'), replaced: group('replaced') },
     peers,
+    remembered: others.length,
+    leftOut,
+    unread: NEEDED.filter((field) => target[field] === null || target[field] === ''),
   };
 }

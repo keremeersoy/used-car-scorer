@@ -495,6 +495,7 @@ test('listings looked at become the price comparison, and can be forgotten', asy
   const { fake } = await autoPanel();
   await browse(fake, 2, '700.000 TL');
   expect(text()).toContain('0 benzer araç var. Sonuç için aynı paketten 3 ilan daha aç.');
+  expect(text()).toContain('Henüz hatırlanan başka ilan yok');
   await browse(fake, 3, '710.000 TL');
   await browse(fake, 4, '720.000 TL');
   await browse(fake, 5, '800.000 TL');
@@ -505,4 +506,11 @@ test('listings looked at become the price comparison, and can be forgotten', asy
   await click('[data-action="clear-seen"]');
   await click('[data-action="confirm-clear-seen"]');
   expect(text()).toContain('Hatırlanan ilan: 0');
+});
+
+test('the comparison says why remembered cars do not count', async () => {
+  const { fake } = await autoPanel([listing({ id: 'x', brand: 'Başka' })]);
+  await browse(fake, 2, '700.000 TL');
+  expect(text()).toContain('Hatırlanan 1 ilanın 0 tanesi benzer');
+  expect(text()).toContain('1 farklı marka veya seri');
 });
